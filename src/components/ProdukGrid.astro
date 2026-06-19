@@ -1,0 +1,100 @@
+---
+import type { Produk } from '../lib/types';
+import ProdukCard from './ProdukCard.astro';
+import EditorialBreak from './EditorialBreak.astro';
+
+interface Props {
+  produkList: Produk[];
+  showFilter?: boolean;
+  limit?: number;
+  id?: string;
+}
+
+const { produkList, showFilter = true, limit, id = 'produk' } = Astro.props;
+
+const kategoriList = ['semua', 'flagship', 'mid-range', 'budget', 'foldable', 'aksesoris'] as const;
+const kategoriLabels: Record<string, string> = {
+  semua: 'Semua',
+  flagship: 'Flagship',
+  'mid-range': 'Mid-Range',
+  budget: 'Budget',
+  foldable: 'Foldable',
+  aksesoris: 'Aksesoris',
+};
+
+const displayList = limit ? produkList.slice(0, limit) : produkList;
+---
+
+<!-- py-20 md:py-28 = 80-112px section gaps per DESIGN.md (64-80px min) -->
+<section id={id} class="py-20 md:py-28 bg-cream">
+  <div class="container-content">
+    <div class="mb-12 reveal">
+      <EditorialBreak
+        eyebrow={id === 'produk' ? 'Katalog' : 'Unggulan'}
+        title={id === 'produk' ? 'Pilihan HP Samsung' : 'Produk Pilihan'}
+        subtitle={id === 'produk'
+          ? 'Temukan Samsung yang pas untuk Anda, dari flagship sampai A-series.'
+          : 'Best-seller yang paling banyak dipilih pelanggan.'}
+        illustration="target"
+      />
+    </div>
+
+    {showFilter && (
+      <div class="flex flex-wrap justify-center gap-2 mb-12" id="filter-container">
+        {kategoriList.map((k) => (
+          <button
+            data-filter={k}
+            class={`filter-btn px-4 py-2 rounded-pill text-sm font-normal transition-colors duration-200 ${
+              k === 'semua'
+                ? 'bg-violet text-white'
+                : 'bg-white text-charcoal border border-stone hover:border-silver'
+            }`}
+          >
+            {kategoriLabels[k]}
+          </button>
+        ))}
+      </div>
+    )}
+
+    <!-- DESIGN.md: Bento rhythm, varied aspect ratios not required here -->
+    <div id="produk-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 reveal-stagger">
+      {displayList.map((produk) => (
+        <ProdukCard produk={produk} />
+      ))}
+    </div>
+
+    {displayList.length === 0 && (
+      <div class="text-center py-16">
+        <p class="text-charcoal/70 text-body-lg">Belum ada produk tersedia.</p>
+      </div>
+    )}
+  </div>
+</section>
+
+<script>
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const grid = document.getElementById('produk-grid');
+
+  filterBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach((b) => {
+        b.classList.remove('bg-violet', 'text-white');
+        b.classList.add('bg-white', 'text-charcoal', 'border', 'border-stone');
+      });
+      btn.classList.remove('bg-white', 'text-charcoal', 'border', 'border-stone');
+      btn.classList.add('bg-violet', 'text-white');
+
+      const filter = (btn as HTMLElement).dataset.filter;
+      const cards = grid?.querySelectorAll('[data-kategori]');
+
+      cards?.forEach((card) => {
+        const el = card as HTMLElement;
+        if (filter === 'semua' || el.dataset.kategori === filter) {
+          el.style.display = '';
+        } else {
+          el.style.display = 'none';
+        }
+      });
+    });
+  });
+</script>

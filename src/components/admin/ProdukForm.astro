@@ -1,0 +1,257 @@
+---
+interface Props {
+  produk?: any;
+  mode?: 'create' | 'edit';
+}
+
+const { produk = null, mode = 'create' } = Astro.props;
+const isEdit = mode === 'edit';
+---
+
+<form id="produk-form" class="space-y-6">
+  {isEdit && <input type="hidden" name="id" value={produk?.id} />}
+
+  <div id="produk-error" role="alert" class="hidden px-3.5 py-2.5 rounded-[10px] bg-red-50 border border-red-200/60 text-sm text-red-700"></div>
+
+  <!-- Section: Identitas -->
+  <section class="admin-card p-5">
+    <h2 class="font-display font-semibold text-samsung-ink mb-4">Identitas Produk</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-samsung-ink mb-1.5">Nama Produk</label>
+        <input
+          type="text"
+          name="nama"
+          value={produk?.nama || ''}
+          required
+          class="input-admin"
+          placeholder="Samsung Galaxy S25 Ultra"
+        />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-samsung-ink mb-1.5">Kategori</label>
+        <select name="kategori" required class="select-admin">
+          <option value="">Pilih kategori</option>
+          <option value="flagship" selected={produk?.kategori === 'flagship'}>Flagship</option>
+          <option value="mid-range" selected={produk?.kategori === 'mid-range'}>Mid-Range</option>
+          <option value="budget" selected={produk?.kategori === 'budget'}>Budget</option>
+          <option value="foldable" selected={produk?.kategori === 'foldable'}>Foldable</option>
+          <option value="aksesoris" selected={produk?.kategori === 'aksesoris'}>Aksesoris</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-samsung-ink mb-1.5">Status Stok</label>
+        <select name="stok" required class="select-admin">
+          <option value="true" selected={produk?.stok !== false}>Tersedia</option>
+          <option value="false" selected={produk?.stok === false}>Habis</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section: Harga -->
+  <section class="admin-card p-5">
+    <h2 class="font-display font-semibold text-samsung-ink mb-4">Harga</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-samsung-ink mb-1.5">Harga (Rp)</label>
+        <input
+          type="number"
+          name="harga"
+          value={produk?.harga || ''}
+          required
+          min="0"
+          class="input-admin tabular-nums"
+          placeholder="19990000"
+        />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-samsung-ink mb-1.5">Harga Coret</label>
+        <input
+          type="number"
+          name="harga_coret"
+          value={produk?.harga_coret || ''}
+          min="0"
+          class="input-admin tabular-nums"
+          placeholder="22990000"
+        />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-samsung-ink mb-1.5">Diskon (%)</label>
+        <input
+          type="number"
+          name="diskon_persen"
+          value={produk?.diskon_persen || ''}
+          min="0"
+          max="100"
+          class="input-admin tabular-nums"
+          placeholder="10"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Section: Spesifikasi -->
+  <section class="admin-card p-5">
+    <h2 class="font-display font-semibold text-samsung-ink mb-4">Spesifikasi</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-samsung-ink mb-1.5">RAM</label>
+        <input type="text" name="ram" value={produk?.spesifikasi?.ram || ''} class="input-admin" placeholder="12GB" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-samsung-ink mb-1.5">Storage</label>
+        <input type="text" name="storage" value={produk?.spesifikasi?.storage || ''} class="input-admin" placeholder="256GB" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-samsung-ink mb-1.5">Processor</label>
+        <input type="text" name="processor" value={produk?.spesifikasi?.processor || ''} class="input-admin" placeholder="Snapdragon 8 Gen 3" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-samsung-ink mb-1.5">Layar</label>
+        <input type="text" name="layar" value={produk?.spesifikasi?.screen || ''} class="input-admin" placeholder="6.8 inch Dynamic AMOLED" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-samsung-ink mb-1.5">Kamera</label>
+        <input type="text" name="kamera" value={produk?.spesifikasi?.camera || ''} class="input-admin" placeholder="200MP + 50MP" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-samsung-ink mb-1.5">Battery</label>
+        <input type="text" name="battery" value={produk?.spesifikasi?.battery || ''} class="input-admin" placeholder="5000mAh" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Section: Visual & Konten -->
+  <section class="admin-card p-5">
+    <h2 class="font-display font-semibold text-samsung-ink mb-4">Visual &amp; Konten</h2>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-samsung-ink mb-1.5">
+          Warna <span class="text-samsung-ink/40 font-normal">(pisahkan dengan koma)</span>
+        </label>
+        <input
+          type="text"
+          name="warna"
+          value={(produk?.warna_tersedia?.length ? produk.warna_tersedia : produk?.warna)?.join(', ') || ''}
+          class="input-admin"
+          placeholder="Black Titanium, Gray Titanium, Blue Titanium"
+        />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-samsung-ink mb-1.5">Deskripsi</label>
+        <textarea
+          name="deskripsi"
+          rows="4"
+          class="input-admin resize-none"
+          placeholder="Deskripsi produk..."
+        >{produk?.deskripsi || ''}</textarea>
+      </div>
+
+      <div class="flex flex-col sm:flex-row sm:items-center gap-4 pt-1">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            name="is_featured"
+            class="checkbox-admin"
+            checked={produk?.is_featured ?? produk?.featured ?? false}
+          />
+          <span class="text-sm text-samsung-ink">Tampilkan di halaman utama</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            name="is_active"
+            class="checkbox-admin"
+            checked={produk?.is_active ?? true}
+          />
+          <span class="text-sm text-samsung-ink">Aktif (tampil di website)</span>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <!-- Actions -->
+  <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-2">
+    <a
+      href="/admin/produk"
+      class="inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold
+             bg-samsung-ink/5 text-samsung-ink/70 hover:bg-samsung-ink/10 transition-colors"
+    >
+      Batal
+    </a>
+    <button type="submit" class="btn-primary text-sm">
+      {isEdit ? 'Update Produk' : 'Simpan Produk'}
+    </button>
+  </div>
+</form>
+
+<script>
+  const form = document.getElementById('produk-form') as HTMLFormElement;
+  const errorBox = document.getElementById('produk-error');
+
+  function showError(msg: string) {
+    if (!errorBox) return;
+    errorBox.textContent = msg;
+    errorBox.classList.remove('hidden');
+    errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBox?.classList.add('hidden');
+
+    const formData = new FormData(form);
+    const warnaArr = ((formData.get('warna') as string) || '')
+      .split(',')
+      .map((w) => w.trim())
+      .filter(Boolean);
+
+    const data = {
+      nama: formData.get('nama'),
+      kategori: formData.get('kategori'),
+      harga: Number(formData.get('harga')),
+      harga_coret: formData.get('harga_coret') ? Number(formData.get('harga_coret')) : null,
+      diskon_persen: formData.get('diskon_persen') ? Number(formData.get('diskon_persen')) : null,
+      stok: formData.get('stok') === 'true',
+      spesifikasi: {
+        ram: formData.get('ram') || null,
+        storage: formData.get('storage') || null,
+        processor: formData.get('processor') || null,
+        screen: formData.get('layar') || null,
+        camera: formData.get('kamera') || null,
+        battery: formData.get('battery') || null,
+      },
+      warna: warnaArr,
+      warna_tersedia: warnaArr,
+      deskripsi: formData.get('deskripsi'),
+      is_featured: formData.get('is_featured') === 'on',
+      is_active: formData.get('is_active') === 'on',
+    };
+
+    const id = formData.get('id');
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? `/api/produk?id=${id}` : '/api/produk';
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) {
+        showError((json && json.error) || `Gagal menyimpan (HTTP ${res.status})`);
+        return;
+      }
+      const msg = id ? 'Produk berhasil diupdate.' : 'Produk berhasil ditambahkan.';
+      sessionStorage.setItem('toast', JSON.stringify({ type: 'success', message: msg }));
+      window.location.href = '/admin/produk';
+    } catch (err) {
+      showError((err as Error).message || 'Terjadi kesalahan jaringan');
+    }
+  });
+</script>

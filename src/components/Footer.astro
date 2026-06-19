@@ -1,0 +1,59 @@
+---
+interface Props {
+  whatsapp?: string;
+  telepon?: string;
+  email?: string;
+  alamat?: string;
+}
+
+const { whatsapp = '', telepon = '', email = '', alamat = '' } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<!-- DESIGN.md: cream canvas footer, ink text, hairline stone border, no heavy divider -->
+<footer class="bg-cream border-t border-stone py-14 md:py-16">
+  <div class="container-content">
+    <div class="grid md:grid-cols-12 gap-10 mb-10">
+      <div class="md:col-span-5">
+        <a href="/" class="inline-flex items-center gap-2.5 mb-4">
+          <div class="w-8 h-8 rounded-md bg-ink flex items-center justify-center">
+            <span class="text-cream font-display font-bold text-sm leading-none">H</span>
+          </div>
+          <span class="font-display font-bold text-base text-ink tracking-tight">Herman Samsung</span>
+        </a>
+        <p class="text-charcoal/80 text-body leading-relaxed max-w-sm">
+          Sales Executive Samsung authorized. Konsultasi gratis, harga terbaik, garansi resmi.
+        </p>
+      </div>
+
+      <div class="md:col-span-3">
+        <h3 class="font-display font-semibold text-sm text-ink tracking-tight mb-3">Menu</h3>
+        <ul class="space-y-2 text-body text-charcoal/80">
+          <li><a href="#produk" class="hover:text-violet transition-colors">Produk</a></li>
+          <li><a href="#tentang" class="hover:text-violet transition-colors">Tentang</a></li>
+          <li><a href="#testimoni" class="hover:text-violet transition-colors">Testimoni</a></li>
+          <li><a href="#kontak" class="hover:text-violet transition-colors">Kontak</a></li>
+        </ul>
+      </div>
+
+      <div class="md:col-span-4">
+        <h3 class="font-display font-semibold text-sm text-ink tracking-tight mb-3">Kontak</h3>
+        <ul class="space-y-2 text-body text-charcoal/80">
+          {whatsapp && <li>WhatsApp: {whatsapp}</li>}
+          {telepon && <li>Telepon: {telepon}</li>}
+          {email && <li class="break-words">{email}</li>}
+          {alamat && <li class="line-clamp-2">{alamat}</li>}
+        </ul>
+      </div>
+    </div>
+
+    <div class="border-t border-stone pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
+      <p class="text-caption text-charcoal/60">
+        &copy; {year} Herman Baharuddin. All rights reserved.
+      </p>
+      <p class="text-caption text-charcoal/60">
+        Samsung Authorized Dealer
+      </p>
+    </div>
+  </div>
+</footer>

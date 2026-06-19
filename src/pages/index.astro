@@ -1,0 +1,95 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import ProdukGrid from '../components/ProdukGrid.astro';
+import Testimoni from '../components/Testimoni.astro';
+import Kontak from '../components/Kontak.astro';
+import TentangSaya from '../components/TentangSaya.astro';
+import { supabase } from '../lib/supabase';
+
+// Fetch profil dari Supabase
+const { data: profilData, error: profilError } = await supabase
+  .from('profil')
+  .select('*')
+  .limit(1)
+  .single();
+
+if (profilError) {
+  console.error('Error fetching profil:', profilError);
+}
+
+const profil = profilData || {
+  nama: 'Herman Baharuddin',
+  jabatan: 'Sales Executive Samsung',
+  tagline: 'Jadikan Samsung Pilihan Tepat Anda',
+  deskripsi: 'Sales Executive Samsung dengan pengalaman lebih dari 10 tahun. Membantu pelanggan menemukan smartphone Samsung terbaik sesuai kebutuhan dan budget.',
+  foto_url: '',
+  whatsapp: '6281234567890',
+  telepon: '081234567890',
+  email: 'herman.baharuddin@samsung.com',
+  alamat: 'Jl. Sudirman No. 123, Jakarta Selatan, DKI Jakarta',
+  jam_operasional: 'Senin - Sabtu: 09.00 - 17.00 WIB',
+};
+
+// Fetch site_settings (homepage copy, editable from admin)
+const { data: settingsData } = await supabase
+  .from('site_settings')
+  .select('*')
+  .eq('id', 1)
+  .single();
+
+const settings = settingsData || {
+  hero_eyebrow: 'Sales Executive Samsung',
+  hero_headline: null,
+  hero_subtitle: null,
+  hero_status_label: 'Tersedia untuk chat',
+  hero_proof_1: '10+ tahun pengalaman',
+  hero_proof_2: 'Garansi resmi Samsung',
+  hero_proof_3: 'Respon < 5 menit',
+  hero_floating_title: 'Top Seller',
+  hero_floating_caption: 'Resmi Samsung SEIN',
+  hero_stat_title: '10+',
+  hero_stat_caption: 'Tahun',
+  cta_primary_label: 'Chat WhatsApp',
+  cta_secondary_label: 'Lihat Produk',
+};
+
+// Fetch produk dari Supabase
+const { data: produkData, error: produkError } = await supabase
+  .from('produk')
+  .select(`
+    *,
+    produk_foto:produk_images(*)
+  `)
+  .eq('is_active', true)
+  .order('sort_order', { ascending: true })
+  .order('created_at', { ascending: false });
+
+if (produkError) {
+  console.error('Error fetching produk:', produkError);
+}
+
+const produkList = produkData || [];
+
+// Fetch testimoni dari Supabase
+const { data: testimoniData, error: testimoniError } = await supabase
+  .from('testimoni')
+  .select('*')
+  .order('tanggal', { ascending: false })
+  .order('created_at', { ascending: false })
+  .limit(8);
+
+if (testimoniError) {
+  console.error('Error fetching testimoni:', testimoniError);
+}
+
+const testimoniList = testimoniData || [];
+---
+
+<BaseLayout title="Herman Baharuddin - Sales Executive Samsung">
+  <Hero profil={profil} settings={settings} />
+  <ProdukGrid produkList={produkList} />
+  <TentangSaya profil={profil} />
+  <Testimoni testimoniList={testimoniList} />
+  <Kontak profil={profil} />
+</BaseLayout>

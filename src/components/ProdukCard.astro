@@ -1,0 +1,120 @@
+---
+interface Props {
+  produk: any;
+}
+
+const { produk } = Astro.props;
+
+function formatRupiah(angka: number): string {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  }).format(angka);
+}
+
+const kategoriLabels: Record<string, string> = {
+  flagship: 'Flagship',
+  'mid-range': 'Mid-Range',
+  budget: 'Budget',
+  foldable: 'Foldable',
+  aksesoris: 'Aksesoris',
+};
+
+// DESIGN.md: stone surface + violet for active selection
+const kategoriStyles: Record<string, string> = {
+  flagship: 'bg-ink text-cream',
+  'mid-range': 'bg-violet text-white',
+  budget: 'bg-skymist text-ink',
+  foldable: 'bg-blossom text-ink',
+  aksesoris: 'bg-yellow text-ink',
+};
+
+const primaryFoto = produk.produk_foto?.find((f: any) => f.is_primary)?.foto_url
+  || produk.produk_foto?.[0]?.foto_url
+  || produk.gambar
+  || null;
+
+const warnaList = produk.warna_tersedia || produk.warna || [];
+
+const hasDiskon = produk.diskon_persen && produk.diskon_persen > 0;
+---
+
+<!-- DESIGN.md Feature Highlight Card: white surface, 24px radius, hairline stone border, NO shadow -->
+<div class="card-white overflow-hidden cursor-pointer group hover:border-silver transition-colors duration-200" data-kategori={produk.kategori}>
+  <!-- Foto — 40px radius per DESIGN.md for images -->
+  <div class="relative aspect-square bg-stone/30 overflow-hidden m-2 rounded-5xl">
+    {primaryFoto ? (
+      <img
+        src={primaryFoto}
+        alt={produk.nama}
+        class="w-full h-full object-cover rounded-5xl group-hover:scale-105 transition-transform duration-500"
+        loading="lazy"
+        width="400"
+        height="400"
+      />
+    ) : (
+      <div class="w-full h-full rounded-5xl flex items-center justify-center">
+        <div class="w-16 h-16 rounded-2xl bg-violet/10 flex items-center justify-center">
+          <svg class="w-8 h-8 text-violet/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+            <line x1="12" y1="18" x2="12.01" y2="18"/>
+          </svg>
+        </div>
+      </div>
+    )}
+
+    <span class={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-caption font-semibold ${kategoriStyles[produk.kategori] || 'bg-stone text-ink'}`}>
+      {kategoriLabels[produk.kategori] || produk.kategori}
+    </span>
+
+    {hasDiskon && (
+      <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full text-caption font-semibold bg-violet text-white">
+        -{produk.diskon_persen}%
+      </span>
+    )}
+
+    {produk.is_featured && !hasDiskon && (
+      <span class="absolute top-3 right-3 badge-yellow">
+        Featured
+      </span>
+    )}
+
+    {!produk.stok && (
+      <div class="absolute inset-0 bg-ink/60 flex items-center justify-center rounded-5xl">
+        <span class="bg-white text-ink px-4 py-2 rounded-full text-sm font-semibold">Stok Habis</span>
+      </div>
+    )}
+  </div>
+
+  <!-- Info -->
+  <div class="p-6">
+    <h3 class="font-display font-semibold text-ink mb-2 line-clamp-2 tracking-tight group-hover:text-violet transition-colors">
+      {produk.nama}
+    </h3>
+
+    {produk.spesifikasi && (
+      <div class="flex flex-wrap gap-1.5 mb-3">
+        {produk.spesifikasi.ram && (
+          <span class="text-caption bg-stone/40 text-charcoal px-2 py-0.5 rounded-full font-medium">{produk.spesifikasi.ram}</span>
+        )}
+        {produk.spesifikasi.storage && (
+          <span class="text-caption bg-stone/40 text-charcoal px-2 py-0.5 rounded-full font-medium">{produk.spesifikasi.storage}</span>
+        )}
+      </div>
+    )}
+
+    <div class="flex items-baseline gap-2">
+      <span class="text-lg font-display font-bold text-ink tracking-tight">{formatRupiah(produk.harga)}</span>
+      {hasDiskon && produk.harga_coret && (
+        <span class="text-sm text-charcoal/40 line-through">{formatRupiah(produk.harga_coret)}</span>
+      )}
+    </div>
+
+    {warnaList && warnaList.length > 0 && (
+      <p class="text-caption text-charcoal/70 mt-2.5 line-clamp-1">
+        {warnaList.slice(0, 3).join(' . ')}{warnaList.length > 3 ? ` . +${warnaList.length - 3}` : ''}
+      </p>
+    )}
+  </div>
+</div>

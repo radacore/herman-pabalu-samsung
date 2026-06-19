@@ -1,0 +1,298 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { supabase } from '../../lib/supabase';
+
+const { data: testimoniData, error } = await supabase
+  .from('testimoni')
+  .select('*')
+  .order('tanggal', { ascending: false })
+  .order('created_at', { ascending: false });
+
+if (error) {
+  console.error('Error fetching testimoni:', error);
+}
+
+const testimoniList = testimoniData || [];
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+---
+
+<AdminLayout title="Testimoni" activeMenu="testimoni">
+  <div class="grid lg:grid-cols-5 gap-6">
+    <!-- Form (left, 2-cols) -->
+    <div class="lg:col-span-2">
+      <div class="admin-card p-5 sticky top-20">
+        <h2 id="form-title" class="font-display font-semibold text-samsung-ink mb-4">Tambah Testimoni</h2>
+        <form id="testimoni-form" class="space-y-4">
+          <input type="hidden" name="id" id="form-id" />
+
+          <div>
+            <label class="block text-sm font-medium text-samsung-ink mb-1.5">Nama</label>
+            <input
+              type="text"
+              name="nama"
+              id="form-nama"
+              required
+              maxlength="100"
+              class="input-admin"
+              placeholder="Budi Santoso"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-medium text-samsung-ink mb-1.5">Rating</label>
+              <select name="rating" id="form-rating" required class="select-admin">
+                <option value="5">5 bintang</option>
+                <option value="4">4 bintang</option>
+                <option value="3">3 bintang</option>
+                <option value="2">2 bintang</option>
+                <option value="1">1 bintang</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-samsung-ink mb-1.5">Tanggal</label>
+              <input type="date" name="tanggal" id="form-tanggal" required class="input-admin" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-samsung-ink mb-1.5">Komentar</label>
+            <textarea
+              name="komentar"
+              id="form-komentar"
+              required
+              maxlength="1000"
+              rows="3"
+              class="input-admin resize-none"
+              placeholder="Pelayanan sangat baik..."
+            ></textarea>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="is_active"
+              id="form-active"
+              checked
+              class="checkbox-admin"
+            />
+            <label for="form-active" class="text-sm font-medium text-samsung-ink">
+              Tampilkan di website
+            </label>
+          </div>
+
+          <div id="form-error" role="alert" class="hidden px-3.5 py-2.5 rounded-[10px] bg-red-50 border border-red-200/60 text-sm text-red-700"></div>
+
+          <div class="flex gap-2 pt-1">
+            <button type="submit" class="btn-primary text-sm flex-1 sm:flex-none">
+              <span id="form-submit-text">Simpan</span>
+            </button>
+            <button
+              type="button"
+              id="cancel-btn"
+              class="hidden px-4 py-2 rounded-full text-sm font-semibold bg-samsung-ink/5 text-samsung-ink/70 hover:bg-samsung-ink/10 transition-colors"
+            >
+              Batal
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- List (right, 3-cols) -->
+    <div class="lg:col-span-3">
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-sm text-samsung-ink/60">{testimoniList.length} testimoni</p>
+      </div>
+
+      {testimoniList.length === 0 ? (
+        <div class="admin-card p-12 text-center">
+          <p class="text-samsung-ink/50">Belum ada testimoni.</p>
+        </div>
+      ) : (
+        <div class="space-y-3">
+          {testimoniList.map((t) => (
+            <article class="admin-card p-5">
+              <div class="flex items-start justify-between gap-3 mb-2">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="w-9 h-9 rounded-full bg-samsung-blue flex items-center justify-center flex-shrink-0">
+                    <span class="text-white font-display font-semibold text-sm">{t.nama.charAt(0)}</span>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="font-semibold text-samsung-ink truncate">{t.nama}</p>
+                    <div class="flex items-center gap-2 text-xs text-samsung-ink/50">
+                      <span class="flex gap-0.5 text-amber-400">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <svg class="w-3 h-3" viewBox="0 0 24 24" fill={i < t.rating ? 'currentColor' : 'none'} stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                          </svg>
+                        ))}
+                      </span>
+                      <span>&middot;</span>
+                      <span>{formatDate(t.tanggal)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1 flex-shrink-0">
+                  {t.is_active
+                    ? <span class="badge-success">Aktif</span>
+                    : <span class="badge-neutral">Hidden</span>
+                  }
+                </div>
+              </div>
+              <p class="text-sm text-samsung-ink/75 leading-relaxed mb-3 line-clamp-3">
+                &ldquo;{t.komentar}&rdquo;
+              </p>
+              <div class="flex items-center gap-1 pt-3 border-t border-samsung-ink/5">
+                <button
+                  data-edit-id={t.id}
+                  data-edit-nama={t.nama}
+                  data-edit-rating={t.rating}
+                  data-edit-tanggal={t.tanggal}
+                  data-edit-komentar={t.komentar}
+                  data-edit-active={String(t.is_active)}
+                  class="edit-btn inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-samsung-blue hover:bg-samsung-blue/10 transition-colors"
+                >
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                  Edit
+                </button>
+                <button
+                  data-id={t.id}
+                  data-name={t.nama}
+                  class="delete-btn inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                  </svg>
+                  Hapus
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  const form = document.getElementById('testimoni-form') as HTMLFormElement;
+  const formTitle = document.getElementById('form-title');
+  const submitText = document.getElementById('form-submit-text');
+  const cancelBtn = document.getElementById('cancel-btn');
+  const errorBox = document.getElementById('form-error');
+
+  function showError(msg: string) {
+    if (!errorBox) return;
+    errorBox.textContent = msg;
+    errorBox.classList.remove('hidden');
+  }
+
+  function resetForm() {
+    form.reset();
+    (document.getElementById('form-id') as HTMLInputElement).value = '';
+    (document.getElementById('form-tanggal') as HTMLInputElement).value = new Date().toISOString().slice(0, 10);
+    (document.getElementById('form-active') as HTMLInputElement).checked = true;
+    if (formTitle) formTitle.textContent = 'Tambah Testimoni';
+    if (submitText) submitText.textContent = 'Simpan';
+    cancelBtn?.classList.add('hidden');
+    errorBox?.classList.add('hidden');
+  }
+
+  (document.getElementById('form-tanggal') as HTMLInputElement).value = new Date().toISOString().slice(0, 10);
+
+  document.querySelectorAll<HTMLButtonElement>('.edit-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      (document.getElementById('form-id') as HTMLInputElement).value = btn.dataset.editId || '';
+      (document.getElementById('form-nama') as HTMLInputElement).value = btn.dataset.editNama || '';
+      (document.getElementById('form-rating') as HTMLSelectElement).value = btn.dataset.editRating || '5';
+      (document.getElementById('form-tanggal') as HTMLInputElement).value = btn.dataset.editTanggal || '';
+      (document.getElementById('form-komentar') as HTMLTextAreaElement).value = btn.dataset.editKomentar || '';
+      (document.getElementById('form-active') as HTMLInputElement).checked = btn.dataset.editActive === 'true';
+      if (formTitle) formTitle.textContent = 'Edit Testimoni';
+      if (submitText) submitText.textContent = 'Update';
+      cancelBtn?.classList.remove('hidden');
+      errorBox?.classList.add('hidden');
+      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  cancelBtn?.addEventListener('click', resetForm);
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBox?.classList.add('hidden');
+
+    const formData = new FormData(form);
+    const id = formData.get('id') as string | null;
+    const data = {
+      nama: formData.get('nama'),
+      rating: Number(formData.get('rating')),
+      komentar: formData.get('komentar'),
+      tanggal: formData.get('tanggal'),
+      is_active: formData.get('is_active') === 'on',
+    };
+
+    const url = id ? `/api/testimoni?id=${encodeURIComponent(id)}` : '/api/testimoni';
+    const method = id ? 'PUT' : 'POST';
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) {
+        showError((json && json.error) || `Gagal menyimpan (HTTP ${res.status})`);
+        return;
+      }
+      const msg = id ? 'Testimoni berhasil diupdate.' : 'Testimoni berhasil ditambahkan.';
+      sessionStorage.setItem('toast', JSON.stringify({ type: 'success', message: msg }));
+      window.location.reload();
+    } catch (err) {
+      showError((err as Error).message || 'Terjadi kesalahan jaringan');
+    }
+  });
+
+  import { toast } from '../../lib/toast';
+  import '../../lib/confirm';
+
+  document.querySelectorAll<HTMLButtonElement>('.delete-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      const name = btn.dataset.name || 'testimoni ini';
+      if (!id) return;
+
+      try {
+        const ok = await (window as any).confirmDialog({
+          title: `Hapus testimoni "${name}"?`,
+          message: 'Testimoni ini akan dihapus permanen dari website.',
+          confirmText: 'Hapus',
+          variant: 'danger',
+          onConfirm: async () => {
+            const res = await fetch(`/api/testimoni?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+            const json = await res.json().catch(() => null);
+            if (!res.ok) {
+              const msg = (json && json.error) || `Gagal menghapus (HTTP ${res.status})`;
+              toast.error(msg);
+              throw new Error(msg);
+            }
+          },
+        });
+        if (ok) {
+          toast.success(`Testimoni "${name}" berhasil dihapus.`);
+          setTimeout(() => window.location.reload(), 800);
+        }
+      } catch (err) {
+        // Error already toasted
+      }
+    });
+  });
+</script>

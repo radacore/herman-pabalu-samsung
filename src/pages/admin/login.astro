@@ -1,0 +1,292 @@
+---
+import '../../styles/global.css';
+---
+
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Masuk - Herman Admin</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="h-full bg-samsung-mist font-admin antialiased text-samsung-ink">
+    <div class="min-h-full grid lg:grid-cols-2">
+
+      <!-- Left: brand panel (hidden on mobile) -->
+      <aside class="hidden lg:flex relative bg-samsung-ink text-white flex-col justify-between p-12 overflow-hidden">
+        <!-- Decorative gradient blobs -->
+        <div class="absolute -top-32 -right-32 w-96 h-96 bg-samsung-blue/30 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-samsung-lightblue/20 rounded-full blur-3xl"></div>
+
+        <!-- Brand -->
+        <div class="relative">
+          <a href="/" class="inline-flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-lg bg-samsung-blue flex items-center justify-center">
+              <span class="text-white font-display font-bold leading-none">H</span>
+            </div>
+            <span class="font-display font-bold tracking-tight">Herman Samsung</span>
+          </a>
+        </div>
+
+        <!-- Copy -->
+        <div class="relative max-w-md">
+          <p class="eyebrow text-samsung-lightblue mb-4">Admin Panel</p>
+          <h2 class="font-display text-4xl font-bold tracking-tight leading-[1.1] mb-4 text-balance">
+            Kelola produk, testimoni, dan profil Anda.
+          </h2>
+          <p class="text-white/60 text-base leading-relaxed">
+            Perubahan tersimpan langsung ke website. Tidak perlu deploy.
+          </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="relative text-xs text-white/40">
+          &copy; {new Date().getFullYear()} Herman Baharuddin
+        </div>
+      </aside>
+
+      <!-- Right: form -->
+      <main class="flex items-center justify-center p-6 sm:p-10">
+        <div class="w-full max-w-md">
+
+          <!-- Mobile brand -->
+          <a href="/" class="lg:hidden inline-flex items-center gap-2 mb-8">
+            <div class="w-8 h-8 rounded-lg bg-samsung-blue flex items-center justify-center">
+              <span class="text-white font-display font-bold text-sm leading-none">H</span>
+            </div>
+            <span class="font-display font-bold text-sm tracking-tight">Herman Samsung</span>
+          </a>
+
+          <div class="mb-8">
+            <p class="eyebrow mb-3 lg:hidden">Admin Panel</p>
+            <h1 class="font-display text-2xl font-bold tracking-tight text-samsung-ink mb-2">
+              Masuk
+            </h1>
+            <p class="text-sm text-samsung-ink/60 leading-relaxed">
+              Gunakan akun admin terdaftar.
+            </p>
+          </div>
+
+          <form id="login-form" class="space-y-5">
+            <!-- Email -->
+            <div>
+              <label for="email" class="block text-sm font-medium text-samsung-ink mb-1.5">Email</label>
+              <div class="input-wrap">
+                <svg class="icon-leading w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="5" width="18" height="14" rx="2" />
+                  <path d="M3 7l9 6 9-6" />
+                </svg>
+                <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  required
+                  autocomplete="email"
+                  spellcheck="false"
+                  class="px-3 py-3"
+                  placeholder="admin@example.com"
+                />
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="password" class="block text-sm font-medium text-samsung-ink">Password</label>
+                <button
+                  type="button"
+                  id="forgot-btn"
+                  class="text-xs font-medium text-samsung-blue hover:text-samsung-darkblue transition-colors"
+                >
+                  Lupa password?
+                </button>
+              </div>
+              <div class="input-wrap">
+                <svg class="icon-leading w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="11" width="18" height="11" rx="2" />
+                  <path d="M7 11V7a5 5 0 0110 0v4" />
+                </svg>
+                <input
+                  id="password"
+                  type="password"
+                  name="password"
+                  required
+                  autocomplete="current-password"
+                  class="px-3 py-3 pr-1"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  id="toggle-password"
+                  aria-label="Tampilkan password"
+                  aria-pressed="false"
+                  class="icon-trailing"
+                  tabindex="-1"
+                >
+                  <svg id="icon-eye" class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <svg id="icon-eye-off" class="hidden w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
+                    <line x1="2" y1="2" x2="22" y2="22" />
+                  </svg>
+                </button>
+              </div>
+              <p id="caps-warning" class="input-caps hidden" role="status">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01" />
+                </svg>
+                Caps Lock aktif
+              </p>
+            </div>
+
+            <div
+              id="error-message"
+              role="alert"
+              class="hidden px-3.5 py-2.5 rounded-[10px] bg-red-50 border border-red-200/60 text-sm text-red-700"
+            ></div>
+
+            <button
+              type="submit"
+              id="submit-btn"
+              class="btn-primary w-full mt-1"
+            >
+              <span id="submit-text">Masuk</span>
+              <svg id="submit-spinner" class="hidden w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"></path>
+              </svg>
+            </button>
+          </form>
+
+          <p class="mt-6 text-center text-xs text-samsung-ink/50">
+            Tidak bisa masuk? Reset via Supabase dashboard.
+          </p>
+
+          <p class="mt-8 text-center text-sm text-samsung-ink/60">
+            <a href="/" class="inline-flex items-center gap-1.5 hover:text-samsung-blue transition-colors">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              Kembali ke Website
+            </a>
+          </p>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      import { supabaseBrowser } from '../../lib/supabase-browser';
+
+      const form = document.getElementById('login-form') as HTMLFormElement;
+      const errorDiv = document.getElementById('error-message');
+      const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+      const submitText = document.getElementById('submit-text');
+      const submitSpinner = document.getElementById('submit-spinner');
+
+      const passwordInput = document.getElementById('password') as HTMLInputElement | null;
+      const toggleBtn = document.getElementById('toggle-password');
+      const iconEye = document.getElementById('icon-eye');
+      const iconEyeOff = document.getElementById('icon-eye-off');
+      const capsWarning = document.getElementById('caps-warning');
+      const forgotBtn = document.getElementById('forgot-btn');
+
+      function setLoading(loading: boolean) {
+        submitBtn.disabled = loading;
+        submitText?.classList.toggle('hidden', loading);
+        submitSpinner?.classList.toggle('hidden', !loading);
+      }
+
+      function showError(msg: string) {
+        if (!errorDiv) return;
+        errorDiv.textContent = msg;
+        errorDiv.classList.remove('hidden');
+      }
+
+      // Password reveal toggle
+      toggleBtn?.addEventListener('click', () => {
+        if (!passwordInput) return;
+        const isHidden = passwordInput.type === 'password';
+        passwordInput.type = isHidden ? 'text' : 'password';
+        iconEye?.classList.toggle('hidden', isHidden);
+        iconEyeOff?.classList.toggle('hidden', !isHidden);
+        toggleBtn.setAttribute('aria-label', isHidden ? 'Sembunyikan password' : 'Tampilkan password');
+        toggleBtn.setAttribute('aria-pressed', String(isHidden));
+        passwordInput.focus();
+      });
+
+      // Caps lock detection on password field
+      function checkCapsLock(e: KeyboardEvent) {
+        if (!capsWarning || !passwordInput) return;
+        const capsOn = e.getModifierState && e.getModifierState('CapsLock');
+        capsWarning.classList.toggle('hidden', !capsOn);
+      }
+      passwordInput?.addEventListener('keydown', checkCapsLock);
+      passwordInput?.addEventListener('keyup', checkCapsLock);
+      passwordInput?.addEventListener('blur', () => capsWarning?.classList.add('hidden'));
+
+      // Forgot password — Supabase sends reset email
+      forgotBtn?.addEventListener('click', async () => {
+        const emailInput = document.getElementById('email') as HTMLInputElement | null;
+        const email = emailInput?.value?.trim();
+        if (!email) {
+          showError('Masukkan email dulu untuk reset password.');
+          emailInput?.focus();
+          return;
+        }
+        try {
+          const { error } = await supabaseBrowser.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + '/admin/login',
+          });
+          if (error) throw error;
+          showError('Link reset sudah dikirim ke email Anda. Cek inbox.');
+          errorDiv.classList.remove('text-red-700', 'bg-red-50', 'border-red-200/60');
+          errorDiv.classList.add('text-emerald-700', 'bg-emerald-50', 'border-emerald-200/60');
+        } catch (err) {
+          showError('Gagal kirim reset: ' + (err as Error).message);
+        }
+      });
+
+      form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorDiv?.classList.add('hidden');
+        // Reset error colors
+        errorDiv.classList.remove('text-emerald-700', 'bg-emerald-50', 'border-emerald-200/60');
+        errorDiv.classList.add('text-red-700', 'bg-red-50', 'border-red-200/60');
+        setLoading(true);
+
+        const formData = new FormData(form);
+        const email = String(formData.get('email') || '');
+        const password = String(formData.get('password') || '');
+
+        try {
+          const { data, error } = await supabaseBrowser.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (error) throw error;
+
+          if (data.session) {
+            document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=3600; SameSite=Lax`;
+            window.location.href = '/admin';
+          }
+        } catch (err) {
+          showError('Email atau password salah.');
+          setLoading(false);
+        }
+      });
+
+      // Redirect if already logged in
+      supabaseBrowser.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          document.cookie = `sb-access-token=${session.access_token}; path=/; max-age=3600; SameSite=Lax`;
+          window.location.href = '/admin';
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,303 @@
+/* Inter Variable + Inter Tight Variable — self-hosted via @fontsource-variable.
+   Plus Jakarta Sans for admin pages only. */
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/inter-tight';
+@import '@fontsource-variable/plus-jakarta-sans';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-cream text-ink font-sans;
+  }
+
+  ::selection {
+    @apply bg-violet text-white;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display;
+    letter-spacing: -0.02em;
+  }
+
+  .font-admin {
+    font-family: '"Plus Jakarta Sans Variable"', 'Inter Variable', system-ui, sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+}
+
+@layer components {
+  .container-content {
+    @apply max-w-content mx-auto px-4 sm:px-6;
+  }
+
+  /* === DESIGN.md components === */
+
+  .btn-primary {
+    /* Violet Primary Action — enterprise submissions */
+    @apply inline-flex items-center justify-center gap-2
+           bg-violet text-white
+           px-6 py-3 rounded-3xl
+           font-semibold tracking-tight text-[15px]
+           hover:bg-violet-deep
+           transition-colors duration-200 ease-out
+           active:scale-[0.98];
+  }
+
+  .btn-yellow {
+    /* Solar Yellow CTA — warm, intimate */
+    @apply inline-flex items-center justify-center gap-2
+           bg-yellow text-ink
+           px-6 py-3 rounded-3xl
+           font-bold tracking-tight text-[15px]
+           hover:bg-yellow/90
+           transition-colors duration-200 ease-out
+           active:scale-[0.98];
+  }
+
+  .btn-outline-dark {
+    /* Outlined dark — secondary commitment */
+    @apply inline-flex items-center justify-center gap-2
+           bg-transparent text-ink border border-ink
+           px-6 py-3 rounded-3xl
+           font-semibold tracking-tight text-[15px]
+           hover:bg-ink hover:text-white
+           transition-colors duration-200 ease-out
+           active:scale-[0.98];
+  }
+
+  .btn-ghost-pill {
+    /* Ghost Pill — tertiary nav (Login, Book demo) */
+    @apply inline-flex items-center justify-center gap-2
+           bg-transparent text-ink border border-ink
+           px-4 py-1.5 rounded-pill
+           font-normal text-sm
+           hover:bg-ink hover:text-white
+           transition-colors duration-200 ease-out
+           active:scale-[0.98];
+  }
+
+  .btn-whatsapp {
+    /* Brand green WhatsApp — for direct contact */
+    @apply inline-flex items-center justify-center gap-2
+           bg-whatsapp text-white
+           px-6 py-3 rounded-3xl
+           font-semibold tracking-tight text-[15px]
+           hover:bg-[#1ebe5b]
+           transition-colors duration-200 ease-out
+           active:scale-[0.98];
+  }
+
+  .card-white {
+    /* DESIGN.md Feature Highlight Card — no shadow, hairline border */
+    @apply bg-white border border-stone rounded-3xl;
+  }
+
+  .card-cream {
+    /* Decorative accent card — solid fill, used for editorial sections */
+    @apply rounded-[40px];
+  }
+
+  .section-title {
+    /* Editorial display — 40-48px weight 700, line-height 1.2 */
+    @apply text-[32px] md:text-[40px] lg:text-display font-bold text-ink leading-[1.2] tracking-tight;
+  }
+
+  .section-subtitle {
+    @apply text-body-lg text-charcoal max-w-2xl leading-[1.6];
+  }
+
+  .eyebrow {
+    @apply inline-block text-caption font-semibold uppercase tracking-[0.18em] text-violet;
+  }
+
+  .badge-violet {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-caption font-semibold bg-violet text-white;
+  }
+
+  .badge-yellow {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-caption font-semibold bg-yellow text-ink;
+  }
+
+  .divider-stone {
+    @apply border-t border-stone;
+  }
+
+  /* Checkmark list item — DESIGN.md component */
+  .check-list-item {
+    @apply flex items-start gap-2.5 text-body text-charcoal leading-[1.5];
+  }
+
+  .check-violet {
+    @apply w-4 h-4 text-violet flex-shrink-0 mt-0.5;
+  }
+
+  /* === Admin tokens (kept for /admin pages) === */
+
+  .input-admin {
+    @apply w-full px-3.5 py-2.5 rounded-md
+           bg-white border border-samsung-ink/15
+           text-sm text-samsung-ink placeholder:text-samsung-ink/40
+           focus:border-samsung-blue focus:ring-2 focus:ring-samsung-blue/20
+           outline-none transition-colors duration-150;
+  }
+
+  .input-admin-sm {
+    @apply input-admin px-3 py-2 text-xs;
+  }
+
+  .select-admin {
+    @apply input-admin pr-9 appearance-none bg-no-repeat bg-[right_0.65rem_center];
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%230a1024' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  }
+
+  .checkbox-admin {
+    @apply w-4 h-4 rounded border-samsung-ink/20
+           text-samsung-blue
+           focus:ring-2 focus:ring-samsung-blue/30 focus:ring-offset-0
+           transition-colors;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2
+           bg-white text-red-600 border border-red-200
+           px-4 py-2 rounded-pill text-sm font-semibold tracking-tight
+           hover:bg-red-50 hover:border-red-300
+           transition-colors duration-150 active:scale-[0.98];
+  }
+
+  .btn-danger-solid {
+    @apply inline-flex items-center justify-center gap-2
+           bg-red-600 text-white px-4 py-2 rounded-pill text-sm font-semibold
+           hover:bg-red-700 transition-colors duration-150 active:scale-[0.98];
+  }
+
+  .admin-card {
+    @apply bg-white rounded-2xl border border-samsung-ink/5;
+  }
+
+  .badge-success {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full
+           text-[11px] font-semibold bg-emerald-50 text-emerald-700
+           border border-emerald-200/60;
+  }
+
+  .badge-warning {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full
+           text-[11px] font-semibold bg-amber-50 text-amber-700
+           border border-amber-200/60;
+  }
+
+  .badge-danger {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full
+           text-[11px] font-semibold bg-red-50 text-red-700
+           border border-red-200/60;
+  }
+
+  .badge-neutral {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full
+           text-[11px] font-semibold bg-samsung-ink/5 text-samsung-ink/70
+           border border-samsung-ink/10;
+  }
+
+  .admin-table {
+    @apply w-full text-sm;
+  }
+
+  .admin-table thead th {
+    @apply px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.08em]
+           text-samsung-ink/50 bg-samsung-mist/50;
+  }
+
+  .admin-table tbody tr {
+    @apply border-t border-samsung-ink/5 transition-colors;
+  }
+
+  .admin-table tbody tr:hover {
+    @apply bg-samsung-mist/50;
+  }
+
+  .admin-table tbody td {
+    @apply px-4 py-3.5 text-samsung-ink/85;
+  }
+
+  /* User menu dropdown */
+  .user-menu-pop {
+    @apply absolute right-0 top-full mt-2 min-w-[200px]
+           bg-white rounded-2xl border border-samsung-ink/5
+           py-1.5 z-50 origin-top-right
+           opacity-0 scale-95 pointer-events-none
+           transition-all duration-150 ease-out;
+  }
+
+  .user-menu-pop[data-open="true"] {
+    @apply opacity-100 scale-100 pointer-events-auto;
+  }
+
+  .user-menu-item {
+    @apply flex items-center gap-2.5 px-3 py-2 mx-1 rounded-md text-sm
+           text-samsung-ink/80 hover:bg-samsung-mist hover:text-samsung-ink
+           transition-colors duration-150;
+  }
+
+  .user-menu-item-danger {
+    @apply user-menu-item text-red-600 hover:bg-red-50 hover:text-red-700;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-stagger > * {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal-stagger.is-visible > * {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-stagger.is-visible > *:nth-child(1) { transition-delay: 0ms; }
+  .reveal-stagger.is-visible > *:nth-child(2) { transition-delay: 80ms; }
+  .reveal-stagger.is-visible > *:nth-child(3) { transition-delay: 160ms; }
+  .reveal-stagger.is-visible > *:nth-child(4) { transition-delay: 240ms; }
+  .reveal-stagger.is-visible > *:nth-child(5) { transition-delay: 320ms; }
+  .reveal-stagger.is-visible > *:nth-child(6) { transition-delay: 400ms; }
+  .reveal-stagger.is-visible > *:nth-child(7) { transition-delay: 480ms; }
+  .reveal-stagger.is-visible > *:nth-child(8) { transition-delay: 560ms; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  html { scroll-behavior: auto; }
+}

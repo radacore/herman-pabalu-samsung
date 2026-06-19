@@ -1,0 +1,128 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import StatCard from '../../components/admin/StatCard.astro';
+import { supabase } from '../../lib/supabase';
+
+const { data: allProduk, error: produkError } = await supabase
+  .from('produk')
+  .select('*');
+
+if (produkError) {
+  console.error('Error fetching produk:', produkError);
+}
+
+const produkList = allProduk || [];
+const totalProduk = produkList.length;
+const stokTersedia = produkList.filter((p) => p.stok).length;
+const stokHabis = produkList.filter((p) => !p.stok).length;
+const totalKategori = new Set(produkList.map((p) => p.kategori)).size;
+
+function formatRupiah(n: number) {
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+}
+
+const recentProduk = produkList
+  .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  .slice(0, 5);
+---
+
+<AdminLayout title="Dashboard" activeMenu="dashboard">
+  <div class="flex items-end justify-between gap-4 mb-6">
+    <div>
+      <p class="text-sm text-samsung-ink/50 mb-1">Selamat datang kembali</p>
+      <h2 class="font-display text-2xl font-bold text-samsung-ink tracking-tight">Ringkasan</h2>
+    </div>
+    <a href="/admin/produk/tambah" class="btn-primary text-sm">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      <span class="hidden sm:inline">Tambah Produk</span>
+      <span class="sm:hidden">Tambah</span>
+    </a>
+  </div>
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+    <StatCard
+      label="Total Produk"
+      value={totalProduk}
+      accent="blue"
+      icon="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+      href="/admin/produk"
+    />
+    <StatCard
+      label="Stok Tersedia"
+      value={stokTersedia}
+      accent="green"
+      ratio={stokTersedia + stokHabis > 0 ? { current: stokTersedia, total: stokTersedia + stokHabis } : undefined}
+      icon="M20 6L9 17l-5-5"
+      href="/admin/produk"
+    />
+    <StatCard
+      label="Stok Habis"
+      value={stokHabis}
+      accent="red"
+      ratio={stokTersedia + stokHabis > 0 ? { current: stokHabis, total: stokTersedia + stokHabis } : undefined}
+      icon="M18 6L6 18M6 6l12 12"
+      href="/admin/produk"
+    />
+    <StatCard
+      label="Kategori"
+      value={totalKategori}
+      accent="purple"
+      icon="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+    />
+  </div>
+
+  <div class="admin-card overflow-hidden">
+    <div class="px-5 py-4 border-b border-samsung-ink/5 flex items-center justify-between">
+      <div>
+        <h3 class="font-display font-semibold text-samsung-ink">Produk Terbaru</h3>
+        <p class="text-xs text-samsung-ink/50 mt-0.5">5 produk paling baru</p>
+      </div>
+      <a href="/admin/produk" class="text-sm font-medium text-samsung-blue hover:text-samsung-darkblue transition-colors inline-flex items-center gap-1">
+        Lihat semua
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 12h14M13 5l7 7-7 7" />
+        </svg>
+      </a>
+    </div>
+    {recentProduk.length > 0 ? (
+      <div class="overflow-x-auto">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Produk</th>
+              <th>Kategori</th>
+              <th>Harga</th>
+              <th>Stok</th>
+              <th>Tanggal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {recentProduk.map((p) => (
+              <tr>
+                <td class="font-medium text-samsung-ink">{p.nama}</td>
+                <td><span class="badge-neutral capitalize">{p.kategori}</span></td>
+                <td class="tabular-nums">{formatRupiah(p.harga)}</td>
+                <td>
+                  {p.stok
+                    ? <span class="badge-success">Tersedia</span>
+                    : <span class="badge-danger">Habis</span>
+                  }
+                </td>
+                <td class="text-samsung-ink/60 text-xs">
+                  {new Date(p.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      <div class="px-5 py-12 text-center">
+        <p class="text-samsung-ink/50 mb-3">Belum ada produk.</p>
+        <a href="/admin/produk/tambah" class="btn-primary text-sm inline-flex">Tambah Produk Pertama</a>
+      </div>
+    )}
+  </div>
+</AdminLayout>

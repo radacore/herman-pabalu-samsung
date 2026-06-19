@@ -1,0 +1,242 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { supabase } from '../../lib/supabase';
+
+const { data: profilData, error } = await supabase
+  .from('profil')
+  .select('*')
+  .order('created_at', { ascending: false })
+  .limit(1)
+  .single();
+
+if (error) {
+  console.error('Error fetching profil:', error);
+}
+
+const profil = profilData || {
+  nama: 'Herman Baharuddin',
+  jabatan: 'Sales Executive Samsung',
+  whatsapp: '08123456789',
+  telepon: '08123456789',
+  email: 'herman.baharuddin@example.com',
+  alamat: 'Jl. Sudirman No. 123, Jakarta Selatan',
+  tentang: 'Sales Executive Samsung dengan pengalaman lebih dari 10 tahun.',
+};
+
+const waClean = String(profil.whatsapp || '').replace(/[^0-9]/g, '');
+const waHref = waClean ? `https://wa.me/${waClean}` : '#';
+---
+
+<AdminLayout title="Profil" activeMenu="profil">
+  <div class="mb-6">
+    <h2 class="font-display text-2xl font-bold text-samsung-ink tracking-tight">Profil</h2>
+    <p class="text-sm text-samsung-ink/50 mt-1">Data yang tampil di halaman depan website</p>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- Form -->
+    <form id="profil-form" class="lg:col-span-2 space-y-6">
+      <div id="profil-error" role="alert" class="hidden px-3.5 py-2.5 rounded-[10px] bg-red-50 border border-red-200/60 text-sm text-red-700"></div>
+      <div id="profil-success" role="status" class="hidden px-3.5 py-2.5 rounded-[10px] bg-emerald-50 border border-emerald-200/60 text-sm text-emerald-700"></div>
+
+      <section class="admin-card p-5">
+        <h3 class="font-display font-semibold text-samsung-ink mb-4">Identitas</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-samsung-ink mb-1.5">Nama Lengkap</label>
+            <input type="text" name="nama" value={profil.nama} required class="input-admin" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-samsung-ink mb-1.5">Jabatan</label>
+            <input type="text" name="jabatan" value={profil.jabatan} required class="input-admin" />
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-samsung-ink mb-1.5">Tagline</label>
+            <input type="text" name="tagline" value={profil.tagline || ''} class="input-admin" placeholder="Jadikan Samsung Pilihan Tepat Anda" />
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-card p-5">
+        <h3 class="font-display font-semibold text-samsung-ink mb-4">Kontak</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-samsung-ink mb-1.5">WhatsApp</label>
+            <input type="tel" name="whatsapp" value={profil.whatsapp} required class="input-admin" placeholder="08123456789" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-samsung-ink mb-1.5">Telepon</label>
+            <input type="tel" name="telepon" value={profil.telepon} class="input-admin" placeholder="08123456789" />
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-samsung-ink mb-1.5">Email</label>
+            <input type="email" name="email" value={profil.email} required class="input-admin" />
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-card p-5">
+        <h3 class="font-display font-semibold text-samsung-ink mb-4">Tentang</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-samsung-ink mb-1.5">Alamat</label>
+            <textarea name="alamat" rows="2" required class="input-admin resize-none">{profil.alamat}</textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-samsung-ink mb-1.5">Deskripsi Singkat</label>
+            <textarea name="deskripsi" rows="2" class="input-admin resize-none" placeholder="Deskripsi singkat untuk hero section">{profil.deskripsi || ''}</textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-samsung-ink mb-1.5">Tentang Saya (Bio)</label>
+            <textarea name="tentang" rows="4" class="input-admin resize-none">{profil.tentang || ''}</textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-samsung-ink mb-1.5">Jam Operasional</label>
+            <input type="text" name="jam_operasional" value={profil.jam_operasional || ''} class="input-admin" placeholder="Senin - Sabtu: 09.00 - 17.00 WIB" />
+          </div>
+        </div>
+      </section>
+
+      <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+        <button
+          type="button"
+          id="reset-btn"
+          class="inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold
+                 bg-samsung-ink/5 text-samsung-ink/70 hover:bg-samsung-ink/10 transition-colors"
+        >
+          Reset
+        </button>
+        <button type="submit" class="btn-primary text-sm">Simpan Perubahan</button>
+      </div>
+    </form>
+
+    <!-- Live preview -->
+    <aside class="lg:col-span-1">
+      <div class="sticky top-20">
+        <p class="text-xs font-semibold uppercase tracking-[0.08em] text-samsung-ink/50 mb-3">Pratinjau</p>
+        <div class="admin-card p-5">
+          <div class="text-center mb-4">
+            <div class="w-16 h-16 rounded-full bg-samsung-blue flex items-center justify-center mx-auto mb-3">
+              <span class="text-white font-display font-bold text-xl">{profil.nama?.charAt(0) || 'H'}</span>
+            </div>
+            <p class="font-display font-bold text-samsung-ink">{profil.nama}</p>
+            <p class="text-xs text-samsung-blue font-semibold">{profil.jabatan}</p>
+          </div>
+
+          <div class="space-y-2.5 text-xs">
+            <div class="flex items-start gap-2">
+              <svg class="w-3.5 h-3.5 text-samsung-ink/40 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347" />
+              </svg>
+              <span class="text-samsung-ink/70 break-all">{profil.whatsapp}</span>
+            </div>
+            <div class="flex items-start gap-2">
+              <svg class="w-3.5 h-3.5 text-samsung-ink/40 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.37 1.9.72 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0122 16.92z" />
+              </svg>
+              <span class="text-samsung-ink/70">{profil.telepon}</span>
+            </div>
+            <div class="flex items-start gap-2">
+              <svg class="w-3.5 h-3.5 text-samsung-ink/40 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6l-10 7L2 6" />
+              </svg>
+              <span class="text-samsung-ink/70 break-all">{profil.email}</span>
+            </div>
+            <div class="flex items-start gap-2">
+              <svg class="w-3.5 h-3.5 text-samsung-ink/40 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0zM12 13a3 3 0 100-6 3 3 0 000 6z" />
+              </svg>
+              <span class="text-samsung-ink/70 line-clamp-2">{profil.alamat}</span>
+            </div>
+          </div>
+
+          <a
+            href={waHref}
+            target="_blank"
+            rel="noopener"
+            class="mt-5 w-full inline-flex items-center justify-center gap-2 bg-[#25D366] text-white
+                   px-4 py-2 rounded-full text-sm font-semibold hover:bg-[#1ebe5b] transition-colors"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347" />
+            </svg>
+            Chat WhatsApp
+          </a>
+        </div>
+      </div>
+    </aside>
+  </div>
+</AdminLayout>
+
+<script>
+  const form = document.getElementById('profil-form') as HTMLFormElement;
+  const errorBox = document.getElementById('profil-error');
+  const successBox = document.getElementById('profil-success');
+  const resetBtn = document.getElementById('reset-btn');
+
+  function showError(msg: string) {
+    if (!errorBox) return;
+    errorBox.textContent = msg;
+    errorBox.classList.remove('hidden');
+    successBox?.classList.add('hidden');
+    errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function showSuccess(msg: string) {
+    if (!successBox) return;
+    successBox.textContent = msg;
+    successBox.classList.remove('hidden');
+    errorBox?.classList.add('hidden');
+    successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => successBox.classList.add('hidden'), 4000);
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBox?.classList.add('hidden');
+    successBox?.classList.add('hidden');
+
+    const formData = new FormData(form);
+    const data = {
+      nama: formData.get('nama'),
+      jabatan: formData.get('jabatan'),
+      tagline: formData.get('tagline') || null,
+      deskripsi: formData.get('deskripsi') || null,
+      whatsapp: formData.get('whatsapp'),
+      telepon: formData.get('telepon') || null,
+      email: formData.get('email'),
+      alamat: formData.get('alamat'),
+      tentang: formData.get('tentang') || null,
+      jam_operasional: formData.get('jam_operasional') || null,
+    };
+
+    try {
+      const res = await fetch('/api/profil', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) {
+        showError((json && json.error) || `Gagal menyimpan (HTTP ${res.status})`);
+        return;
+      }
+      showSuccess('Profil berhasil disimpan.');
+      sessionStorage.setItem('toast', JSON.stringify({ type: 'success', message: 'Profil berhasil disimpan.' }));
+    } catch (err) {
+      showError((err as Error).message || 'Terjadi kesalahan jaringan');
+    }
+  });
+
+  resetBtn?.addEventListener('click', async () => {
+    try {
+      const ok = await (window as any).confirmDialog({
+        title: 'Reset semua perubahan?',
+        message: 'Perubahan yang belum disimpan akan hilang.',
+        confirmText: 'Reset',
+        variant: 'primary',
+      });
+      if (ok) window.location.reload();
+    } catch (_) {}
+  });
+</script>

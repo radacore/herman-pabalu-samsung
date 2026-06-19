@@ -1,0 +1,209 @@
+---
+import type { SiteSettings } from '../lib/types';
+
+interface Props {
+  profil: {
+    nama: string;
+    jabatan: string;
+    tagline: string;
+    deskripsi: string;
+    foto_url: string;
+    whatsapp: string;
+    telepon: string;
+  };
+  settings: SiteSettings;
+}
+
+const { profil, settings } = Astro.props;
+const waClean = String(profil.whatsapp || '').replace(/[^0-9]/g, '');
+const waHref = waClean
+  ? `https://wa.me/${waClean}?text=Halo%20Pak%20Herman%2C%20saya%20tertarik%20dengan%20HP%20Samsung`
+  : '#';
+
+// Site settings override profile defaults
+const headline = settings.hero_headline?.trim() || profil.nama;
+const subtitle = settings.hero_subtitle?.trim() || profil.tagline;
+
+const initials = profil.nama
+  .split(/\s+/)
+  .map((s) => s.charAt(0))
+  .slice(0, 2)
+  .join('')
+  .toUpperCase();
+---
+
+<!-- DESIGN.md: Hero Geometric Panel — asymmetric split (text left, photo card right) -->
+<section class="relative pt-28 md:pt-24 pb-24 md:pb-32 overflow-hidden bg-violet min-h-[90dvh]">
+  <!-- Faceted geometric atmosphere -->
+  <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="g-light-1" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#5b54ff" stop-opacity="0.7"/>
+        <stop offset="100%" stop-color="#1009f6" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="g-light-2" x1="1" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#7d76ff" stop-opacity="0.5"/>
+        <stop offset="100%" stop-color="#1009f6" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="g-deep" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0%" stop-color="#0a05c4" stop-opacity="0.85"/>
+        <stop offset="100%" stop-color="#1009f6" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+
+    <polygon points="900,0 1440,0 1440,540 1100,320" fill="url(#g-light-1)"/>
+    <polygon points="640,0 920,0 720,280" fill="#ffffff" fill-opacity="0.05"/>
+    <polygon points="0,900 0,420 520,900" fill="url(#g-deep)"/>
+    <polygon points="1180,900 1440,900 1440,560 1320,780" fill="url(#g-deep)"/>
+    <polygon points="1280,280 1440,280 1440,640 1320,640" fill="url(#g-light-2)"/>
+    <polygon points="0,720 200,720 0,900" fill="url(#g-deep)" fill-opacity="0.6"/>
+
+    <circle cx="1180" cy="160" r="90" fill="#ffba09" fill-opacity="0.22"/>
+    <circle cx="1180" cy="160" r="50" fill="#ffba09" fill-opacity="0.32"/>
+
+    <path d="M 80 540 Q 140 500, 200 540 T 320 540" stroke="#ffffff" stroke-opacity="0.18" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle cx="100" cy="540" r="4" fill="#ffba09" fill-opacity="0.6"/>
+    <circle cx="300" cy="540" r="3" fill="#add3e5" fill-opacity="0.5"/>
+  </svg>
+
+  <div class="relative container-content">
+    <div class="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+      <!-- LEFT: copy + CTAs (60%) -->
+      <div class="lg:col-span-7 text-center lg:text-left">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-pill bg-white/10 backdrop-blur-sm border border-white/15 mb-6">
+          <span class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+          </span>
+          <span class="text-caption font-medium text-white/85">{settings.hero_status_label || settings.hero_eyebrow || profil.jabatan}</span>
+        </div>
+
+        <h1 class="text-[44px] md:text-[56px] lg:text-[68px] font-bold text-white leading-[1.02] tracking-[-0.03em] text-balance mb-5">
+          {headline}
+        </h1>
+
+        <p class="text-body-lg md:text-[20px] text-white/85 max-w-xl mx-auto lg:mx-0 leading-[1.5] mb-8 font-normal">
+          {subtitle}
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-10">
+          <a href={waHref} target={waClean ? '_blank' : undefined} rel={waClean ? 'noopener' : undefined} class="btn-yellow">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+            </svg>
+            {settings.cta_primary_label || 'Chat WhatsApp'}
+          </a>
+          <a href="#produk" class="inline-flex items-center justify-center gap-2 bg-transparent text-white border border-white/30 px-6 py-3 rounded-3xl font-semibold tracking-tight text-[15px] hover:bg-white hover:text-violet transition-colors duration-200 ease-out active:scale-[0.98]">
+            {settings.cta_secondary_label || 'Lihat Produk'}
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+
+        <ul class="flex flex-wrap items-center gap-x-5 gap-y-2 justify-center lg:justify-start text-body text-white/75">
+          <li class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-yellow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+            <span>{settings.hero_proof_1}</span>
+          </li>
+          <li class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-yellow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+            <span>{settings.hero_proof_2}</span>
+          </li>
+          <li class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-yellow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+            <span>{settings.hero_proof_3}</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- RIGHT: photo card (40%) — wraps in shake animation, floating cards move with it -->
+      <div class="lg:col-span-5 relative reveal">
+        <div class="relative max-w-sm mx-auto lg:max-w-none lg:ml-auto hero-shake">
+          <!-- Photo card — no name overlay, just the photo -->
+          <div class="relative aspect-[4/5] rounded-3xl overflow-hidden bg-white ring-1 ring-white/10">
+            {profil.foto_url ? (
+              <img
+                src={profil.foto_url}
+                alt={profil.nama}
+                class="w-full h-full object-cover"
+                loading="eager"
+                width="480"
+                height="600"
+              />
+            ) : (
+              <div class="w-full h-full bg-gradient-to-br from-violet/10 via-blossom/30 to-yellow/30 flex items-center justify-center">
+                <span class="font-display font-bold text-[120px] text-violet/40 leading-none">
+                  {initials || 'H'}
+                </span>
+              </div>
+            )}
+
+            <!-- Top-right yellow accent corner (per DESIGN.md editorial accent) -->
+            <div class="absolute top-0 right-0 w-20 h-20 md:w-24 md:h-24">
+              <div class="absolute top-0 right-0 w-full h-full bg-yellow" style="clip-path: polygon(100% 0, 100% 100%, 0 0);"></div>
+            </div>
+          </div>
+
+          <!-- Floating accent card — bottom-left, moves with photo -->
+          <div class="absolute -bottom-4 -left-4 sm:-left-8 bg-white rounded-3xl px-5 py-3.5 max-w-[200px]">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-violet flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 2l2.39 7.36H22l-6.18 4.49L18.18 21 12 16.27 5.82 21l2.36-7.15L2 9.36h7.61L12 2z"/>
+                </svg>
+              </div>
+              <div class="leading-tight min-w-0">
+                <p class="text-caption font-bold text-ink uppercase tracking-wide">{settings.hero_floating_title}</p>
+                <p class="text-[11px] text-charcoal">{settings.hero_floating_caption}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Floating mini stat card — top-right, moves with photo -->
+          <div class="absolute -top-3 -right-3 sm:-right-6 bg-yellow text-ink rounded-2xl px-4 py-2.5">
+            <p class="text-caption font-bold uppercase tracking-wide leading-none">{settings.hero_stat_title}</p>
+            <p class="text-[11px] font-semibold leading-tight mt-0.5">{settings.hero_stat_caption}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom wave divider -->
+  <svg class="absolute bottom-0 left-0 right-0 w-full" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 80 L0 40 Q 360 0 720 30 T 1440 20 L1440 80 Z" fill="#f0f0ec"/>
+  </svg>
+</section>
+
+<style>
+  /* Hero photo block gentle sway. Pivot near bottom-center so it
+     looks like a portrait being held, not a fan. */
+  .hero-shake {
+    transform-origin: 50% 80%;
+    animation: photo-sway 5s ease-in-out infinite;
+  }
+  .hero-shake:hover {
+    animation: photo-shake 0.5s ease-in-out infinite;
+  }
+  @keyframes photo-sway {
+    0%, 100% { transform: rotate(-1.5deg); }
+    50%      { transform: rotate(1.5deg); }
+  }
+  @keyframes photo-shake {
+    0%, 100% { transform: rotate(-2.5deg) translateY(0); }
+    25%      { transform: rotate(2.5deg) translateY(-2px); }
+    50%      { transform: rotate(-2.5deg) translateY(0); }
+    75%      { transform: rotate(2.5deg) translateY(-2px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-shake,
+    .hero-shake:hover { animation: none; }
+  }
+</style>

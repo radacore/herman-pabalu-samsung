@@ -1,0 +1,218 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { supabase } from '../../lib/supabase';
+
+const { data: settings } = await supabase
+  .from('site_settings')
+  .select('*')
+  .eq('id', 1)
+  .single();
+
+// Default values if row not yet populated
+const s = settings ?? {
+  hero_eyebrow: 'Sales Executive Samsung',
+  hero_headline: '',
+  hero_subtitle: '',
+  hero_status_label: 'Tersedia untuk chat',
+  hero_proof_1: '10+ tahun pengalaman',
+  hero_proof_2: 'Garansi resmi Samsung',
+  hero_proof_3: 'Respon < 5 menit',
+  hero_floating_title: 'Top Seller',
+  hero_floating_caption: 'Resmi Samsung SEIN',
+  hero_stat_title: '10+',
+  hero_stat_caption: 'Tahun',
+  cta_primary_label: 'Chat WhatsApp',
+  cta_secondary_label: 'Lihat Produk',
+};
+---
+
+<AdminLayout title="Pengaturan Website" activeMenu="pengaturan">
+  <div class="mb-6">
+    <h2 class="font-display text-2xl font-bold text-ink tracking-tight">Pengaturan Website</h2>
+    <p class="text-sm text-charcoal/60 mt-1">Edit teks yang tampil di halaman utama. Perubahan tersimpan ke database.</p>
+  </div>
+
+  <form id="settings-form" class="space-y-6 max-w-3xl">
+    <div id="form-error" role="alert" class="hidden px-3.5 py-2.5 rounded-md bg-red-50 border border-red-200/60 text-sm text-red-700"></div>
+    <div id="form-success" role="status" class="hidden px-3.5 py-2.5 rounded-md bg-emerald-50 border border-emerald-200/60 text-sm text-emerald-700"></div>
+
+    <!-- Hero: Identitas -->
+    <section class="admin-card p-5">
+      <h3 class="font-display font-semibold text-ink mb-1">Hero Section</h3>
+      <p class="text-xs text-charcoal/60 mb-4">Teks utama di section paling atas website.</p>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-samsung-ink mb-1.5">Eyebrow (pill di atas nama)</label>
+          <input type="text" name="hero_eyebrow" value={s.hero_eyebrow} class="input-admin" placeholder="Sales Executive Samsung" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-samsung-ink mb-1.5">
+            Headline
+            <span class="text-charcoal/40 font-normal ml-1">(kosongkan untuk pakai nama dari Profil)</span>
+          </label>
+          <input type="text" name="hero_headline" value={s.hero_headline ?? ''} class="input-admin" placeholder="Contoh: Herman Baharuddin" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-samsung-ink mb-1.5">
+            Subtitle
+            <span class="text-charcoal/40 font-normal ml-1">(kosongkan untuk pakai tagline dari Profil)</span>
+          </label>
+          <textarea name="hero_subtitle" rows="2" class="input-admin resize-none" placeholder="Tagline utama"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hero: Status + Proof chips -->
+    <section class="admin-card p-5">
+      <h3 class="font-display font-semibold text-ink mb-1">Status &amp; Proof Chips</h3>
+      <p class="text-xs text-charcoal/60 mb-4">Teks pill status hidup dan 3 poin kepercayaan.</p>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-samsung-ink mb-1.5">Status label (pill hijau)</label>
+          <input type="text" name="hero_status_label" value={s.hero_status_label} class="input-admin" placeholder="Tersedia untuk chat" />
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-sm font-medium text-samsung-ink mb-1.5">Proof 1</label>
+            <input type="text" name="hero_proof_1" value={s.hero_proof_1} class="input-admin" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-samsung-ink mb-1.5">Proof 2</label>
+            <input type="text" name="hero_proof_2" value={s.hero_proof_2} class="input-admin" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-samsung-ink mb-1.5">Proof 3</label>
+            <input type="text" name="hero_proof_3" value={s.hero_proof_3} class="input-admin" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hero: Floating cards -->
+    <section class="admin-card p-5">
+      <h3 class="font-display font-semibold text-ink mb-1">Floating Cards</h3>
+      <p class="text-xs text-charcoal/60 mb-4">Mini card yang nempel di photo (stat & top seller).</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-samsung-ink mb-1.5">Stat title (kuning, top-right)</label>
+          <input type="text" name="hero_stat_title" value={s.hero_stat_title} class="input-admin" placeholder="10+" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-samsung-ink mb-1.5">Stat caption (kuning, top-right)</label>
+          <input type="text" name="hero_stat_caption" value={s.hero_stat_caption} class="input-admin" placeholder="Tahun" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-samsung-ink mb-1.5">Top seller title (putih, bottom-left)</label>
+          <input type="text" name="hero_floating_title" value={s.hero_floating_title} class="input-admin" placeholder="Top Seller" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-samsung-ink mb-1.5">Top seller caption (putih, bottom-left)</label>
+          <input type="text" name="hero_floating_caption" value={s.hero_floating_caption} class="input-admin" placeholder="Resmi Samsung SEIN" />
+        </div>
+      </div>
+    </section>
+
+    <!-- CTAs -->
+    <section class="admin-card p-5">
+      <h3 class="font-display font-semibold text-ink mb-1">Tombol CTA</h3>
+      <p class="text-xs text-charcoal/60 mb-4">Label tombol utama dan sekunder di hero.</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-samsung-ink mb-1.5">CTA Utama (kuning)</label>
+          <input type="text" name="cta_primary_label" value={s.cta_primary_label} class="input-admin" placeholder="Chat WhatsApp" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-samsung-ink mb-1.5">CTA Sekunder (outlined)</label>
+          <input type="text" name="cta_secondary_label" value={s.cta_secondary_label} class="input-admin" placeholder="Lihat Produk" />
+        </div>
+      </div>
+    </section>
+
+    <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-2">
+      <a href="/admin" class="inline-flex items-center justify-center px-5 py-2.5 rounded-pill text-sm font-semibold bg-samsung-ink/5 text-samsung-ink/70 hover:bg-samsung-ink/10 transition-colors">
+        Kembali
+      </a>
+      <button type="submit" id="submit-btn" class="btn-primary text-sm">
+        <span id="submit-text">Simpan Pengaturan</span>
+        <svg id="submit-spinner" class="hidden w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"></path>
+        </svg>
+      </button>
+    </div>
+  </form>
+</AdminLayout>
+
+<script>
+  import { toast } from '../../lib/toast';
+
+  const form = document.getElementById('settings-form') as HTMLFormElement;
+  const errorBox = document.getElementById('form-error');
+  const successBox = document.getElementById('form-success');
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+  const submitText = document.getElementById('submit-text');
+  const submitSpinner = document.getElementById('submit-spinner');
+
+  function setLoading(loading: boolean) {
+    submitBtn.disabled = loading;
+    submitText?.classList.toggle('hidden', loading);
+    submitSpinner?.classList.toggle('hidden', !loading);
+  }
+
+  function showError(msg: string) {
+    if (!errorBox) return;
+    errorBox.textContent = msg;
+    errorBox.classList.remove('hidden');
+    successBox?.classList.add('hidden');
+    errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function showSuccess(msg: string) {
+    if (!successBox) return;
+    successBox.textContent = msg;
+    successBox.classList.remove('hidden');
+    errorBox?.classList.add('hidden');
+    successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBox?.classList.add('hidden');
+    successBox?.classList.add('hidden');
+    setLoading(true);
+
+    const fd = new FormData(form);
+    const data: Record<string, unknown> = {};
+    for (const [k, v] of fd.entries()) {
+      const value = typeof v === 'string' ? v.trim() : v;
+      data[k] = value === '' ? null : value;
+    }
+
+    try {
+      const res = await fetch('/api/site-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) {
+        const msg = (json && json.error) || `Gagal menyimpan (HTTP ${res.status})`;
+        showError(msg);
+        toast.error(msg);
+        setLoading(false);
+        return;
+      }
+      showSuccess('Pengaturan berhasil disimpan.');
+      toast.success('Pengaturan website berhasil disimpan.');
+      setLoading(false);
+    } catch (err) {
+      showError((err as Error).message || 'Terjadi kesalahan jaringan');
+      toast.error('Gagal menyimpan pengaturan.');
+      setLoading(false);
+    }
+  });
+</script>

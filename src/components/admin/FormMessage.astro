@@ -1,0 +1,31 @@
+---
+interface Props {
+  type?: 'success' | 'error' | 'info';
+  message?: string;
+  id?: string;
+}
+
+const { type = 'info', message = '', id } = Astro.props;
+
+const styles: Record<string, string> = {
+  success: 'bg-green-50 text-green-800 border-green-200',
+  error: 'bg-red-50 text-red-800 border-red-200',
+  info: 'bg-blue-50 text-blue-800 border-blue-200',
+};
+---
+
+<div
+  id={id}
+  data-form-message
+  data-type={type}
+  class={`form-message hidden mt-4 px-4 py-3 border rounded-lg text-sm ${styles[type]}`}
+  role="alert"
+>
+  {message}
+</div>
+
+<style>
+  .form-message:not(.hidden) {
+    display: block;
+  }
+</style>

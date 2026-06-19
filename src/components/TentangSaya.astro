@@ -1,0 +1,80 @@
+---
+import EditorialBreak from './EditorialBreak.astro';
+
+interface Props {
+  profil: {
+    nama: string;
+    jabatan: string;
+    deskripsi: string;
+  };
+}
+
+const { profil } = Astro.props;
+
+const highlights = [
+  { title: 'Harga Terbaik', desc: 'Transparan dan kompetitif untuk semua produk.' },
+  { title: 'Konsultasi Gratis', desc: 'Bantu pilih HP sesuai kebutuhan Anda.' },
+  { title: 'Garansi Resmi', desc: 'Semua produk bergaransi Samsung Indonesia.' },
+  { title: 'Pengiriman Aman', desc: 'Packing rapi, kirim ke seluruh Indonesia.' },
+  { title: 'After-Sales', desc: 'Layanan purna jual yang responsif.' },
+  { title: 'Top Seller', desc: 'Pencapaian penjualan terbaik region.' },
+];
+
+const checkList = [
+  'Konsultasi gratis, tanpa tekanan beli',
+  'Produk original bergaransi resmi',
+  'Harga transparan dan kompetitif',
+  'After-sales responsif via WhatsApp',
+];
+
+const checkIcon = 'M20 6L9 17l-5-5';
+---
+
+<!-- Per DESIGN.md: 2-col form layout pattern adapted — copy+checklist left, highlights right -->
+<section id="tentang" class="py-20 md:py-28 bg-cream">
+  <div class="container-content">
+    <div class="grid md:grid-cols-2 gap-12 lg:gap-16 items-start">
+      <!-- Left: copy + checkmark list -->
+      <div class="reveal">
+        <EditorialBreak
+          eyebrow="Tentang Saya"
+          title="Bukan sekadar jual HP."
+          subtitle="Saya bantu Anda pilih yang tepat. Tanpa tekanan, dengan harga yang masuk akal."
+          illustration="eye"
+          align="left"
+        />
+
+        <p class="text-charcoal leading-[1.6] mb-8 mt-6">
+          {profil.deskripsi || `Saya ${profil.nama}, ${profil.jabatan} di Samsung. Dengan pengalaman bertahun-tahun di industri retail smartphone, saya fokus pada hal yang sederhana: pastikan Anda dapat produk original dengan harga yang masuk akal, dan ada seseorang yang bisa dihubungi kalau ada masalah.`}
+        </p>
+
+        <!-- DESIGN.md Checkmark List Item: violet tick + 14px text -->
+        <ul class="space-y-3">
+          {checkList.map((item) => (
+            <li class="check-list-item">
+              <svg class="check-violet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d={checkIcon} />
+              </svg>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Right: 6 highlight cards (2x3) — DESIGN.md: white surface, 24px radius, 32px padding -->
+      <div class="reveal-stagger grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-3">
+        {highlights.map((item) => (
+          <div class="card-white p-6">
+            <div class="w-10 h-10 rounded-xl bg-violet/10 flex items-center justify-center mb-3">
+              <svg class="w-5 h-5 text-violet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d={checkIcon} />
+              </svg>
+            </div>
+            <h3 class="font-display font-semibold text-ink text-sm tracking-tight mb-1">{item.title}</h3>
+            <p class="text-caption text-charcoal leading-relaxed">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

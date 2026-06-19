@@ -1,0 +1,98 @@
+---
+import Navbar from '../components/Navbar.astro';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+import { supabase } from '../lib/supabase';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const {
+  title,
+  description = 'Herman Baharuddin — Sales Executive Samsung authorized. Dapatkan harga terbaik untuk Samsung Galaxy S25, Z Fold, A-series. Chat WhatsApp sekarang!',
+  ogImage = '/og-image.jpg',
+} = Astro.props;
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://hermansamsung.com';
+const canonicalURL = new URL(Astro.url.pathname, siteUrl);
+
+const { data: profil } = await supabase
+  .from('profil')
+  .select('whatsapp, telepon, email, alamat')
+  .order('created_at', { ascending: false })
+  .limit(1)
+  .single();
+
+const profilContact = profil ?? {
+  whatsapp: '',
+  telepon: '',
+  email: '',
+  alamat: '',
+};
+
+const phoneForSchema = String(profilContact.telepon || profilContact.whatsapp || '').replace(/[^0-9+]/g, '');
+---
+
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={`${siteUrl}${ogImage}`} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="id_ID" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={`${siteUrl}${ogImage}`} />
+
+    <meta name="theme-color" content="#1428a0" />
+
+    <!-- Local Business Schema -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'LocalBusiness',
+      name: 'Herman Baharuddin — Samsung Sales',
+      description: 'Sales Executive Samsung authorized',
+      telephone: phoneForSchema || undefined,
+      url: siteUrl,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: profilContact.alamat || 'Indonesia',
+        addressCountry: 'ID',
+      },
+    })} />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen bg-cream text-ink font-sans antialiased">
+    <Navbar whatsapp={profilContact.whatsapp} />
+    <main>
+      <slot />
+    </main>
+    <Footer
+      whatsapp={profilContact.whatsapp}
+      telepon={profilContact.telepon}
+      email={profilContact.email}
+      alamat={profilContact.alamat}
+    />
+    <WhatsAppButton whatsapp={profilContact.whatsapp} />
+    <script>
+      import '../scripts/reveal.ts';
+    </script>
+  </body>
+</html>
