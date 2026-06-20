@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { supabaseAdmin } from '../../lib/supabase-admin';
+import { requireAuth } from '../../lib/auth';
 import { ValidationError, validateProfilPayload } from '../../lib/validation';
 
 function jsonResponse(body: unknown, status = 200) {
@@ -9,13 +9,14 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
-export const PUT: APIRoute = async ({ request }) => {
+export const PUT: APIRoute = async (context) => {
   try {
-    const raw = await request.json();
+    const supabase = requireAuth(context);
+    const raw = await context.request.json();
     const profil = validateProfilPayload(raw);
 
     // Upsert by the fixed seed id from schema.sql
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabase
       .from('profil')
       .upsert({ id: '00000000-0000-0000-0000-000000000001', ...profil }, { onConflict: 'id' })
       .select()
@@ -25,6 +26,7 @@ export const PUT: APIRoute = async ({ request }) => {
 
     return jsonResponse({ success: true, data });
   } catch (err) {
+    if (err instanceof Response) return err;
     if (err instanceof ValidationError) {
       return jsonResponse({ success: false, error: err.message }, 400);
     }
@@ -32,9 +34,11 @@ export const PUT: APIRoute = async ({ request }) => {
   }
 };
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async (context) => {
   try {
-    const { data, error } = await supabaseAdmin
+    const supabase = requireAuth(context);
+
+    const { data, error } = await supabase
       .from('profil')
       .select('*')
       .order('created_at', { ascending: false })
@@ -45,6 +49,7 @@ export const GET: APIRoute = async () => {
 
     return jsonResponse({ success: true, data });
   } catch (err) {
+    if (err instanceof Response) return err;
     return jsonResponse({ success: false, error: (err as Error).message }, 500);
   }
 };

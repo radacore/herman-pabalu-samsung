@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { supabaseAdmin } from '../../lib/supabase-admin';
+import { requireAuth } from '../../lib/auth';
 import { ValidationError, validateProdukPayload } from '../../lib/validation';
 
 function jsonResponse(body: unknown, status = 200) {
@@ -9,12 +9,13 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async (context) => {
   try {
-    const raw = await request.json();
+    const supabase = requireAuth(context);
+    const raw = await context.request.json();
     const produk = validateProdukPayload(raw);
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabase
       .from('produk')
       .insert(produk)
       .select()
@@ -24,6 +25,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     return jsonResponse({ success: true, data }, 201);
   } catch (err) {
+    if (err instanceof Response) return err;
     if (err instanceof ValidationError) {
       return jsonResponse({ success: false, error: err.message }, 400);
     }
@@ -31,35 +33,60 @@ export const POST: APIRoute = async ({ request }) => {
   }
 };
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async (context) => {
   try {
-    const { data, error } = await supabaseAdmin
+    const supabase = requireAuth(context);
+    const url = new URL(context.request.url);
+
+    const page = Math.max(1, Number(url.searchParams.get('page') || 1));
+    const pageSize = Math.min(100, Math.max(1, Number(url.searchParams.get('pageSize') || 20)));
+    const q = (url.searchParams.get('q') || '').trim();
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    let query = supabase
       .from('produk')
-      .select('*')
+      .select('*', { count: 'exact' })
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false });
 
+    if (q) {
+      query = query.ilike('nama', `%${q}%`);
+    }
+
+    const { data, error, count } = await query.range(from, to);
+
     if (error) throw error;
 
-    return jsonResponse({ success: true, data });
+    const total = count || 0;
+    return jsonResponse({
+      success: true,
+      data: data || [],
+      page,
+      pageSize,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / pageSize)),
+    });
   } catch (err) {
+    if (err instanceof Response) return err;
     return jsonResponse({ success: false, error: (err as Error).message }, 500);
   }
 };
 
-export const PUT: APIRoute = async ({ request }) => {
+export const PUT: APIRoute = async (context) => {
   try {
-    const url = new URL(request.url);
+    const supabase = requireAuth(context);
+    const url = new URL(context.request.url);
     const id = url.searchParams.get('id');
 
     if (!id) {
       return jsonResponse({ success: false, error: 'ID produk tidak ditemukan' }, 400);
     }
 
-    const raw = await request.json();
+    const raw = await context.request.json();
     const produk = validateProdukPayload(raw);
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabase
       .from('produk')
       .update(produk)
       .eq('id', id)
@@ -70,6 +97,7 @@ export const PUT: APIRoute = async ({ request }) => {
 
     return jsonResponse({ success: true, data });
   } catch (err) {
+    if (err instanceof Response) return err;
     if (err instanceof ValidationError) {
       return jsonResponse({ success: false, error: err.message }, 400);
     }
@@ -77,16 +105,17 @@ export const PUT: APIRoute = async ({ request }) => {
   }
 };
 
-export const DELETE: APIRoute = async ({ request }) => {
+export const DELETE: APIRoute = async (context) => {
   try {
-    const url = new URL(request.url);
+    const supabase = requireAuth(context);
+    const url = new URL(context.request.url);
     const id = url.searchParams.get('id');
 
     if (!id) {
       return jsonResponse({ success: false, error: 'ID produk tidak ditemukan' }, 400);
     }
 
-    const { error } = await supabaseAdmin
+    const { error } = await supabase
       .from('produk')
       .delete()
       .eq('id', id);
@@ -95,6 +124,7 @@ export const DELETE: APIRoute = async ({ request }) => {
 
     return jsonResponse({ success: true, message: 'Produk berhasil dihapus' });
   } catch (err) {
+    if (err instanceof Response) return err;
     return jsonResponse({ success: false, error: (err as Error).message }, 500);
   }
 };

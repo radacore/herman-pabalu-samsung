@@ -1,4 +1,6 @@
 ---
+import { KATEGORI_LABELS } from '../lib/types';
+
 interface Props {
   produk: any;
 }
@@ -13,14 +15,6 @@ function formatRupiah(angka: number): string {
   }).format(angka);
 }
 
-const kategoriLabels: Record<string, string> = {
-  flagship: 'Flagship',
-  'mid-range': 'Mid-Range',
-  budget: 'Budget',
-  foldable: 'Foldable',
-  aksesoris: 'Aksesoris',
-};
-
 // DESIGN.md: stone surface + violet for active selection
 const kategoriStyles: Record<string, string> = {
   flagship: 'bg-ink text-cream',
@@ -30,14 +24,16 @@ const kategoriStyles: Record<string, string> = {
   aksesoris: 'bg-yellow text-ink',
 };
 
-const primaryFoto = produk.produk_foto?.find((f: any) => f.is_primary)?.foto_url
-  || produk.produk_foto?.[0]?.foto_url
-  || produk.gambar
+const primaryFoto = produk.produk_foto?.find((f: any) => f.is_primary)?.url
+  || produk.produk_foto?.[0]?.url
   || null;
 
 const warnaList = produk.warna_tersedia || produk.warna || [];
 
 const hasDiskon = produk.diskon_persen && produk.diskon_persen > 0;
+
+const labelLookup = KATEGORI_LABELS as Record<string, string>;
+const styleLookup = kategoriStyles as Record<string, string>;
 ---
 
 <!-- DESIGN.md Feature Highlight Card: white surface, 24px radius, hairline stone border, NO shadow -->
@@ -64,8 +60,8 @@ const hasDiskon = produk.diskon_persen && produk.diskon_persen > 0;
       </div>
     )}
 
-    <span class={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-caption font-semibold ${kategoriStyles[produk.kategori] || 'bg-stone text-ink'}`}>
-      {kategoriLabels[produk.kategori] || produk.kategori}
+    <span class={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-caption font-semibold ${styleLookup[produk.kategori] || 'bg-stone text-ink'}`}>
+      {labelLookup[produk.kategori] || produk.kategori}
     </span>
 
     {hasDiskon && (

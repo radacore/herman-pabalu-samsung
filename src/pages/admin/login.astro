@@ -1,5 +1,22 @@
 ---
 import '../../styles/global.css';
+import { createClient } from '@supabase/supabase-js';
+import { AUTH_COOKIE } from '../../lib/auth';
+
+// Server-side: if user already has a valid HttpOnly cookie, skip the form
+// and redirect straight to the dashboard. HttpOnly cookies cannot be read
+// from JavaScript, so this has to happen in SSR frontmatter.
+const supabaseUrl = import.meta.env.SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY;
+const existingToken = Astro.cookies.get(AUTH_COOKIE)?.value;
+if (supabaseUrl && supabaseAnonKey && existingToken) {
+  const probe = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { Authorization: `Bearer ${existingToken}` } },
+  });
+  const { data: { user } } = await probe.auth.getUser();
+  if (user) return Astro.redirect('/admin');
+}
 ---
 
 <!DOCTYPE html>
@@ -179,8 +196,6 @@ import '../../styles/global.css';
     </div>
 
     <script>
-      import { supabaseBrowser } from '../../lib/supabase-browser';
-
       const form = document.getElementById('login-form') as HTMLFormElement;
       const errorDiv = document.getElementById('error-message');
       const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
@@ -192,7 +207,7 @@ import '../../styles/global.css';
       const iconEye = document.getElementById('icon-eye');
       const iconEyeOff = document.getElementById('icon-eye-off');
       const capsWarning = document.getElementById('caps-warning');
-      const forgotBtn = document.getElementById('forgot-btn');
+      const emailInput = document.getElementById('email') as HTMLInputElement | null;
 
       function setLoading(loading: boolean) {
         submitBtn.disabled = loading;
@@ -204,6 +219,16 @@ import '../../styles/global.css';
         if (!errorDiv) return;
         errorDiv.textContent = msg;
         errorDiv.classList.remove('hidden');
+        errorDiv.classList.remove('text-emerald-700', 'bg-emerald-50', 'border-emerald-200/60');
+        errorDiv.classList.add('text-red-700', 'bg-red-50', 'border-red-200/60');
+      }
+
+      function showInfo(msg: string) {
+        if (!errorDiv) return;
+        errorDiv.textContent = msg;
+        errorDiv.classList.remove('hidden');
+        errorDiv.classList.remove('text-red-700', 'bg-red-50', 'border-red-200/60');
+        errorDiv.classList.add('text-emerald-700', 'bg-emerald-50', 'border-emerald-200/60');
       }
 
       // Password reveal toggle
@@ -228,34 +253,17 @@ import '../../styles/global.css';
       passwordInput?.addEventListener('keyup', checkCapsLock);
       passwordInput?.addEventListener('blur', () => capsWarning?.classList.add('hidden'));
 
-      // Forgot password — Supabase sends reset email
-      forgotBtn?.addEventListener('click', async () => {
-        const emailInput = document.getElementById('email') as HTMLInputElement | null;
-        const email = emailInput?.value?.trim();
-        if (!email) {
-          showError('Masukkan email dulu untuk reset password.');
-          emailInput?.focus();
-          return;
-        }
-        try {
-          const { error } = await supabaseBrowser.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin + '/admin/login',
-          });
-          if (error) throw error;
-          showError('Link reset sudah dikirim ke email Anda. Cek inbox.');
-          errorDiv.classList.remove('text-red-700', 'bg-red-50', 'border-red-200/60');
-          errorDiv.classList.add('text-emerald-700', 'bg-emerald-50', 'border-emerald-200/60');
-        } catch (err) {
-          showError('Gagal kirim reset: ' + (err as Error).message);
-        }
+      // Forgot password — ask the user to contact the site owner.
+      // Server-side reset would require an extra endpoint; out of scope for now.
+      const forgotBtn = document.getElementById('forgot-btn');
+      forgotBtn?.addEventListener('click', () => {
+        showInfo('Hubungi pemilik website untuk reset password.');
       });
 
       form?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        errorDiv?.classList.add('hidden');
-        // Reset error colors
-        errorDiv.classList.remove('text-emerald-700', 'bg-emerald-50', 'border-emerald-200/60');
-        errorDiv.classList.add('text-red-700', 'bg-red-50', 'border-red-200/60');
+        if (!errorDiv) return;
+        errorDiv.classList.add('hidden');
         setLoading(true);
 
         const formData = new FormData(form);
@@ -263,28 +271,22 @@ import '../../styles/global.css';
         const password = String(formData.get('password') || '');
 
         try {
-          const { data, error } = await supabaseBrowser.auth.signInWithPassword({
-            email,
-            password,
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ email, password }),
           });
-
-          if (error) throw error;
-
-          if (data.session) {
-            document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=3600; SameSite=Lax`;
-            window.location.href = '/admin';
+          const json = await res.json().catch(() => null);
+          if (!res.ok) {
+            showError((json && json.error) || `Gagal masuk (HTTP ${res.status})`);
+            setLoading(false);
+            return;
           }
-        } catch (err) {
-          showError('Email atau password salah.');
-          setLoading(false);
-        }
-      });
-
-      // Redirect if already logged in
-      supabaseBrowser.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          document.cookie = `sb-access-token=${session.access_token}; path=/; max-age=3600; SameSite=Lax`;
           window.location.href = '/admin';
+        } catch (err) {
+          showError('Tidak bisa terhubung ke server. Coba lagi.');
+          setLoading(false);
         }
       });
     </script>

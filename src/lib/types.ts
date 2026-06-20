@@ -45,16 +45,8 @@ export interface Spesifikasi {
 export interface ProdukFoto {
   id: string;
   produk_id: string;
-  foto_url: string;
+  url: string;
   is_primary: boolean;
-  sort_order: number;
-  created_at: string;
-}
-
-export interface AdminUser {
-  id: string;
-  email: string;
-  role: string;
   created_at: string;
 }
 
@@ -93,12 +85,4 @@ export const KATEGORI_LABELS: Record<Produk['kategori'], string> = {
   budget: 'Budget',
   foldable: 'Foldable',
   aksesoris: 'Aksesoris',
-};
-
-export const KATEGORI_COLORS: Record<Produk['kategori'], string> = {
-  flagship: 'bg-samsung-blue text-white',
-  'mid-range': 'bg-blue-500 text-white',
-  budget: 'bg-green-500 text-white',
-  foldable: 'bg-purple-500 text-white',
-  aksesoris: 'bg-orange-500 text-white',
 };

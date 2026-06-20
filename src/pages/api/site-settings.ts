@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { supabaseAdmin } from '../../lib/supabase-admin';
+import { requireAuth } from '../../lib/auth';
 
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -8,9 +8,11 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async (context) => {
   try {
-    const { data, error } = await supabaseAdmin
+    const supabase = requireAuth(context);
+
+    const { data, error } = await supabase
       .from('site_settings')
       .select('*')
       .eq('id', 1)
@@ -20,13 +22,15 @@ export const GET: APIRoute = async () => {
 
     return jsonResponse({ success: true, data });
   } catch (err) {
+    if (err instanceof Response) return err;
     return jsonResponse({ success: false, error: (err as Error).message }, 500);
   }
 };
 
-export const PUT: APIRoute = async ({ request }) => {
+export const PUT: APIRoute = async (context) => {
   try {
-    const body = await request.json();
+    const supabase = requireAuth(context);
+    const body = await context.request.json();
 
     const allowed = [
       'hero_eyebrow',
@@ -50,7 +54,7 @@ export const PUT: APIRoute = async ({ request }) => {
     }
     payload.updated_at = new Date().toISOString();
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabase
       .from('site_settings')
       .upsert(payload, { onConflict: 'id' })
       .select()
@@ -60,6 +64,7 @@ export const PUT: APIRoute = async ({ request }) => {
 
     return jsonResponse({ success: true, data });
   } catch (err) {
+    if (err instanceof Response) return err;
     return jsonResponse({ success: false, error: (err as Error).message }, 500);
   }
 };

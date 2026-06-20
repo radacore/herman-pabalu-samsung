@@ -181,10 +181,14 @@ const { title, activeMenu = 'dashboard' } = Astro.props;
         if (e.key === 'Escape') closeMenu();
       });
 
-      // Sidebar footer logout + topbar dropdown logout share handler
+      // Logout: clear HttpOnly cookie via server endpoint, then redirect.
       async function handleLogout() {
-        await supabaseBrowser.auth.signOut();
-        document.cookie = 'sb-access-token=; path=/; max-age=0; SameSite=Lax';
+        try {
+          await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+        } catch (_) {
+          // Even if the endpoint fails, try to clear local Supabase state
+        }
+        try { await supabaseBrowser.auth.signOut(); } catch (_) {}
         window.location.href = '/admin/login';
       }
 
@@ -195,7 +199,7 @@ const { title, activeMenu = 'dashboard' } = Astro.props;
         .querySelector<HTMLElement>('[data-sidebar-logout]')
         ?.addEventListener('click', handleLogout);
 
-      // Hydrate user info
+      // Hydrate user info (best-effort: email cached client-side after login)
       supabaseBrowser.auth.getSession().then(({ data: { session } }) => {
         if (session?.user?.email) {
           if (emailEl) emailEl.textContent = session.user.email;
@@ -203,8 +207,6 @@ const { title, activeMenu = 'dashboard' } = Astro.props;
           if (avatarEl && session.user.email) {
             avatarEl.textContent = session.user.email.charAt(0).toUpperCase();
           }
-        } else {
-          window.location.href = '/admin/login';
         }
       });
     </script>

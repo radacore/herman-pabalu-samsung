@@ -1,5 +1,6 @@
 import { defineMiddleware } from 'astro:middleware';
 import { createClient } from '@supabase/supabase-js';
+import { AUTH_COOKIE } from './lib/auth';
 
 const PUBLIC_ADMIN_PATHS = new Set(['/admin/login', '/admin/login/']);
 
@@ -22,11 +23,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return redirect('/admin/login');
   }
 
-  // Read access token from Supabase's default cookie name pattern.
-  // When using supabase-js in the browser, it stores session in localStorage by
-  // default. For SSR auth checks we rely on the `sb-access-token` cookie set
-  // by supabase.auth.getSession() in the browser after login.
-  const accessToken = cookies.get('sb-access-token')?.value;
+  // Read access token from HttpOnly cookie set by /api/auth/login.
+  const accessToken = cookies.get(AUTH_COOKIE)?.value;
 
   if (!accessToken) {
     return redirect('/admin/login');
