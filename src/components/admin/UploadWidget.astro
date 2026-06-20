@@ -83,9 +83,9 @@
   // Load produk list
   async function loadProduk() {
     try {
-      const res = await fetch('/api/produk');
+      const res = await fetch('/api/produk?pageSize=100');
       const { data } = await res.json();
-      data.forEach((p: any) => {
+      (data || []).forEach((p: any) => {
         const option = document.createElement('option');
         option.value = p.id;
         option.textContent = p.nama;

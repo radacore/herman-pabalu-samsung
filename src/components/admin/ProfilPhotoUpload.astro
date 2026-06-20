@@ -1,0 +1,112 @@
+---
+interface Props {
+  currentUrl: string | null;
+  nama: string;
+}
+
+const { currentUrl, nama } = Astro.props;
+
+const initials = nama
+  .split(/\s+/)
+  .map((s) => s.charAt(0))
+  .slice(0, 2)
+  .join('')
+  .toUpperCase();
+---
+
+<div
+  class="admin-card p-5"
+  data-profil-photo
+  data-current-url={currentUrl || ''}
+>
+  <h3 class="font-display font-semibold text-samsung-ink mb-1">Foto Profil</h3>
+  <p class="text-xs text-samsung-ink/50 mb-4">Tampil di hero section homepage. Format JPG/PNG/WebP, max 5MB.</p>
+
+  <div class="flex items-start gap-5">
+    <div class="w-24 h-24 rounded-full overflow-hidden bg-samsung-mist flex-shrink-0 ring-2 ring-samsung-ink/5">
+      {currentUrl ? (
+        <img src={currentUrl} alt={nama} class="w-full h-full object-cover" />
+      ) : (
+        <div class="w-full h-full flex items-center justify-center bg-samsung-blue/10 text-samsung-blue">
+          <span class="font-display font-bold text-2xl">{initials || 'H'}</span>
+        </div>
+      )}
+    </div>
+
+    <div class="flex-1 min-w-0">
+      <div class="border-2 border-dashed border-samsung-ink/10 rounded-xl p-4 text-center hover:border-samsung-blue transition-colors cursor-pointer" data-drop-zone>
+        <svg class="mx-auto h-8 w-8 text-samsung-ink/30" fill="none" stroke="currentColor" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p class="text-sm text-samsung-ink/60 mt-2">
+          <span class="font-semibold text-samsung-blue">Klik untuk pilih</span> atau drop file
+        </p>
+        <p class="text-xs text-samsung-ink/40 mt-1">JPG, PNG, WebP · 5MB max</p>
+        <input type="file" accept="image/*" class="hidden" data-file-input />
+      </div>
+
+      <p class="text-xs text-samsung-ink/40 mt-2 hidden" data-upload-status></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { toast } from '../../lib/toast';
+
+  const root = document.querySelector<HTMLElement>('[data-profil-photo]');
+  if (root) {
+    const dropZone = root.querySelector<HTMLElement>('[data-drop-zone]');
+    const fileInput = root.querySelector<HTMLInputElement>('[data-file-input]');
+    const statusEl = root.querySelector<HTMLElement>('[data-upload-status]');
+
+    function showStatus(msg: string, isError: boolean) {
+      if (!statusEl) return;
+      statusEl.textContent = msg;
+      statusEl.classList.remove('hidden', 'text-samsung-ink/40', 'text-red-600', 'text-emerald-600');
+      statusEl.classList.add(isError ? 'text-red-600' : 'text-emerald-600');
+    }
+
+    async function uploadFile(file: File) {
+      showStatus('Mengupload...', false);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('/api/profil/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const json = await res.json().catch(() => null);
+        if (!res.ok) {
+          showStatus((json && json.error) || 'Gagal upload', true);
+          toast.error((json && json.error) || 'Gagal upload foto profil');
+          return;
+        }
+        showStatus('Upload berhasil. Menyimpan...', false);
+        toast.success('Foto profil diperbarui.');
+        setTimeout(() => window.location.reload(), 600);
+      } catch (err) {
+        showStatus((err as Error).message || 'Gagal upload', true);
+      }
+    }
+
+    dropZone?.addEventListener('click', () => fileInput?.click());
+    dropZone?.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('border-samsung-blue', 'bg-samsung-blue/5');
+    });
+    dropZone?.addEventListener('dragleave', () => {
+      dropZone.classList.remove('border-samsung-blue', 'bg-samsung-blue/5');
+    });
+    dropZone?.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('border-samsung-blue', 'bg-samsung-blue/5');
+      const file = e.dataTransfer?.files?.[0];
+      if (file) uploadFile(file);
+    });
+    fileInput?.addEventListener('change', (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) uploadFile(file);
+    });
+  }
+</script>

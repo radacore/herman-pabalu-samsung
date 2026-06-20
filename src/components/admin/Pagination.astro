@@ -1,0 +1,98 @@
+---
+interface Props {
+  page: number;
+  totalPages: number;
+  total: number;
+  basePath: string;
+  extraParams?: Record<string, string | undefined>;
+}
+
+const { page, totalPages, total, basePath, extraParams = {} } = Astro.props;
+
+function buildHref(p: number): string {
+  const params = new URLSearchParams();
+  if (p > 1) params.set('page', String(p));
+  for (const [k, v] of Object.entries(extraParams)) {
+    if (v) params.set(k, v);
+  }
+  const qs = params.toString();
+  return qs ? `${basePath}?${qs}` : basePath;
+}
+
+const start = total === 0 ? 0 : (page - 1) * 20 + 1;
+const end = Math.min(page * 20, total);
+const hasPrev = page > 1;
+const hasNext = page < totalPages;
+
+// Page numbers: first, ..., current-1, current, current+1, ..., last
+const pages: (number | 'ellipsis')[] = [];
+if (totalPages <= 7) {
+  for (let i = 1; i <= totalPages; i++) pages.push(i);
+} else {
+  pages.push(1);
+  if (page > 3) pages.push('ellipsis');
+  for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
+    pages.push(i);
+  }
+  if (page < totalPages - 2) pages.push('ellipsis');
+  pages.push(totalPages);
+}
+---
+
+{total > 0 && (
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 mt-4 border-t border-samsung-ink/5">
+    <p class="text-xs text-samsung-ink/50">
+      Menampilkan <span class="font-semibold text-samsung-ink">{start}-{end}</span> dari <span class="font-semibold text-samsung-ink">{total}</span>
+    </p>
+
+    {totalPages > 1 && (
+      <nav class="flex items-center gap-1" aria-label="Pagination">
+        <a
+          href={hasPrev ? buildHref(page - 1) : '#'}
+          aria-disabled={!hasPrev}
+          class={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-samsung-ink/70 transition-colors ${
+            hasPrev
+              ? 'hover:bg-samsung-ink/5 cursor-pointer'
+              : 'opacity-30 pointer-events-none'
+          }`}
+        >
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </a>
+
+        {pages.map((p) =>
+          p === 'ellipsis' ? (
+            <span class="px-1 text-samsung-ink/30 text-sm">…</span>
+          ) : (
+            <a
+              href={buildHref(p)}
+              aria-current={p === page ? 'page' : undefined}
+              class={`inline-flex items-center justify-center min-w-[32px] h-8 px-2 rounded-lg text-sm font-semibold transition-colors ${
+                p === page
+                  ? 'bg-samsung-blue text-white'
+                  : 'text-samsung-ink/70 hover:bg-samsung-ink/5'
+              }`}
+            >
+              {p}
+            </a>
+          )
+        )}
+
+        <a
+          href={hasNext ? buildHref(page + 1) : '#'}
+          aria-disabled={!hasNext}
+          class={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-samsung-ink/70 transition-colors ${
+            hasNext
+              ? 'hover:bg-samsung-ink/5 cursor-pointer'
+              : 'opacity-30 pointer-events-none'
+          }`}
+        >
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </a>
+      </nav>
+    )}
+  </div>
+)}

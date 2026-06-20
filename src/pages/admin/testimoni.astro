@@ -1,18 +1,27 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
+import Pagination from '../../components/admin/Pagination.astro';
 import { supabase } from '../../lib/supabase';
 
-const { data: testimoniData, error } = await supabase
+const page = Math.max(1, Number(Astro.url.searchParams.get('page') || 1));
+const pageSize = 20;
+const from = (page - 1) * pageSize;
+const to = from + pageSize - 1;
+
+const { data: testimoniData, error, count } = await supabase
   .from('testimoni')
-  .select('*')
+  .select('*', { count: 'exact' })
   .order('tanggal', { ascending: false })
-  .order('created_at', { ascending: false });
+  .order('created_at', { ascending: false })
+  .range(from, to);
 
 if (error) {
   console.error('Error fetching testimoni:', error);
 }
 
 const testimoniList = testimoniData || [];
+const total = count || 0;
+const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -105,7 +114,9 @@ function formatDate(iso: string) {
     <!-- List (right, 3-cols) -->
     <div class="lg:col-span-3">
       <div class="flex items-center justify-between mb-4">
-        <p class="text-sm text-samsung-ink/60">{testimoniList.length} testimoni</p>
+        <p class="text-sm text-samsung-ink/60">
+          {total > 0 ? `${total} testimoni` : 'Belum ada testimoni'}
+        </p>
       </div>
 
       {testimoniList.length === 0 ? (
@@ -177,6 +188,13 @@ function formatDate(iso: string) {
           ))}
         </div>
       )}
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        basePath="/admin/testimoni"
+      />
     </div>
   </div>
 </AdminLayout>

@@ -1,16 +1,15 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import ProdukForm from '../../../components/admin/ProdukForm.astro';
+import PhotoGallery from '../../../components/admin/PhotoGallery.astro';
 import { supabase } from '../../../lib/supabase';
 
-// Ambil ID dari query parameter
 const id = Astro.url.searchParams.get('id');
 
 if (!id) {
   return Astro.redirect('/admin/produk');
 }
 
-// Fetch produk dari Supabase
 const { data: produkData, error } = await supabase
   .from('produk')
   .select(`
@@ -26,10 +25,21 @@ if (error || !produkData) {
 }
 
 const produk = produkData;
+const photos = (produk.produk_foto || []).sort((a: any, b: any) => {
+  if (a.is_primary && !b.is_primary) return -1;
+  if (!a.is_primary && b.is_primary) return 1;
+  return 0;
+});
 ---
 
 <AdminLayout title="Edit Produk">
-  <div class="max-w-4xl">
+  <div class="max-w-4xl space-y-6">
+    <div>
+      <h2 class="font-display text-2xl font-bold text-samsung-ink tracking-tight">Edit Produk</h2>
+      <p class="text-sm text-samsung-ink/50 mt-1">{produk.nama}</p>
+    </div>
+
     <ProdukForm produk={produk} />
+    <PhotoGallery produkId={produk.id} photos={photos} />
   </div>
 </AdminLayout>

@@ -1,20 +1,43 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
+import Pagination from '../../components/admin/Pagination.astro';
 import { supabase } from '../../lib/supabase';
 
-const { data: produkData, error } = await supabase
+const page = Math.max(1, Number(Astro.url.searchParams.get('page') || 1));
+const pageSize = 20;
+const q = (Astro.url.searchParams.get('q') || '').trim();
+const from = (page - 1) * pageSize;
+const to = from + pageSize - 1;
+
+let query = supabase
   .from('produk')
   .select(`
     *,
     produk_foto:produk_images(*)
-  `)
+  `, { count: 'exact' })
+  .order('sort_order', { ascending: true })
   .order('created_at', { ascending: false });
+
+if (q) {
+  query = query.ilike('nama', `%${q}%`);
+}
+
+const { data: produkData, error, count } = await query.range(from, to);
 
 if (error) {
   console.error('Error fetching produk:', error);
 }
 
-const produkList = produkData || [];
+const produkList = (produkData || []).map((p: any) => ({
+  ...p,
+  produk_foto: [...(p.produk_foto || [])].sort((a: any, b: any) => {
+    if (a.is_primary && !b.is_primary) return -1;
+    if (!a.is_primary && b.is_primary) return 1;
+    return 0;
+  }),
+}));
+const total = count || 0;
+const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
 function formatRupiah(n: number) {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
@@ -22,30 +45,57 @@ function formatRupiah(n: number) {
 ---
 
 <AdminLayout title="Produk" activeMenu="produk">
-  <div class="flex items-end justify-between gap-4 mb-6">
+  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
     <div>
       <h2 class="font-display text-2xl font-bold text-samsung-ink tracking-tight">Daftar Produk</h2>
-      <p class="text-sm text-samsung-ink/50 mt-1">{produkList.length} produk total</p>
+      <p class="text-sm text-samsung-ink/50 mt-1">
+        {q ? `${total} hasil untuk "${q}"` : `${total} produk total`}
+      </p>
     </div>
-    <a href="/admin/produk/tambah" class="btn-primary text-sm">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M12 5v14M5 12h14" />
-      </svg>
-      Tambah Produk
-    </a>
+    <div class="flex items-center gap-2">
+      <form method="get" action="/admin/produk" class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-samsung-ink/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+        <input
+          type="search"
+          name="q"
+          value={q}
+          placeholder="Cari produk..."
+          class="input-admin-sm pl-9 w-48 sm:w-56"
+          autocomplete="off"
+        />
+      </form>
+      <a href="/admin/produk/tambah" class="btn-primary text-sm flex-shrink-0">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        Tambah
+      </a>
+    </div>
   </div>
 
   {produkList.length === 0 ? (
     <div class="admin-card p-12 text-center">
-      <p class="text-samsung-ink/50 mb-4">Belum ada produk.</p>
-      <a href="/admin/produk/tambah" class="btn-primary text-sm inline-flex">Tambah Produk Pertama</a>
+      {q ? (
+        <>
+          <p class="text-samsung-ink/50 mb-4">Tidak ada produk yang cocok dengan "{q}".</p>
+          <a href="/admin/produk" class="btn-primary text-sm inline-flex">Lihat Semua</a>
+        </>
+      ) : (
+        <>
+          <p class="text-samsung-ink/50 mb-4">Belum ada produk.</p>
+          <a href="/admin/produk/tambah" class="btn-primary text-sm inline-flex">Tambah Produk Pertama</a>
+        </>
+      )}
     </div>
   ) : (
     <div class="admin-card overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="admin-table">
+        <table class="admin-table" data-reorderable>
           <thead>
             <tr>
+              <th class="w-8"></th>
               <th>Produk</th>
               <th>Kategori</th>
               <th>Harga</th>
@@ -54,9 +104,21 @@ function formatRupiah(n: number) {
               <th class="text-right">Aksi</th>
             </tr>
           </thead>
-          <tbody>
-            {produkList.map((produk) => (
-              <tr>
+          <tbody data-reorder-body>
+            {produkList.map((produk: any, idx: number) => (
+              <tr
+                draggable="true"
+                data-id={produk.id}
+                data-sort-order={produk.sort_order}
+                class="cursor-grab active:cursor-grabbing"
+              >
+                <td class="text-samsung-ink/30 select-none">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
+                    <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+                    <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
+                  </svg>
+                </td>
                 <td>
                   <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-lg bg-samsung-mist overflow-hidden flex-shrink-0">
@@ -125,6 +187,16 @@ function formatRupiah(n: number) {
           </tbody>
         </table>
       </div>
+
+      <div class="px-4 sm:px-5">
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          basePath="/admin/produk"
+          extraParams={{ q }}
+        />
+      </div>
     </div>
   )}
 </AdminLayout>
@@ -133,6 +205,7 @@ function formatRupiah(n: number) {
   import { toast } from '../../lib/toast';
   import '../../lib/confirm';
 
+  // ── Delete ──
   document.querySelectorAll<HTMLButtonElement>('.delete-btn').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const id = btn.dataset.id;
@@ -164,4 +237,73 @@ function formatRupiah(n: number) {
       }
     });
   });
+
+  // ── Drag-to-reorder ──
+  const tbody = document.querySelector<HTMLElement>('[data-reorder-body]');
+  if (tbody) {
+    let dragId: string | null = null;
+
+    tbody.querySelectorAll<HTMLTableRowElement>('tr[draggable]').forEach((row) => {
+      row.addEventListener('dragstart', (e) => {
+        dragId = row.dataset.id || null;
+        row.classList.add('opacity-40');
+        e.dataTransfer?.setData('text/plain', dragId || '');
+        e.dataTransfer!.effectAllowed = 'move';
+      });
+      row.addEventListener('dragend', () => {
+        row.classList.remove('opacity-40');
+        tbody.querySelectorAll('tr').forEach((r) => r.classList.remove('ring-2', 'ring-samsung-blue/30'));
+        dragId = null;
+      });
+      row.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer!.dropEffect = 'move';
+        if (row.dataset.id !== dragId) {
+          row.classList.add('ring-2', 'ring-samsung-blue/30');
+        }
+      });
+      row.addEventListener('dragleave', () => {
+        row.classList.remove('ring-2', 'ring-samsung-blue/30');
+      });
+      row.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        row.classList.remove('ring-2', 'ring-samsung-blue/30');
+        if (!dragId || row.dataset.id === dragId) return;
+
+        const rows = Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr[draggable]'));
+        const fromIdx = rows.findIndex((r) => r.dataset.id === dragId);
+        const toIdx = rows.findIndex((r) => r.dataset.id === row.dataset.id);
+        if (fromIdx === -1 || toIdx === -1) return;
+
+        // Reorder DOM
+        if (fromIdx < toIdx) row.after(rows[fromIdx]);
+        else row.before(rows[fromIdx]);
+
+        // Build new sort_order from current visual order, starting at 0 in 10-step
+        const reordered = Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr[draggable]'));
+        const items = reordered.map((r, i) => ({
+          id: r.dataset.id!,
+          sort_order: i * 10,
+        }));
+
+        try {
+          const res = await fetch('/api/produk/reorder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items }),
+          });
+          const json = await res.json().catch(() => null);
+          if (!res.ok) {
+            toast.error((json && json.error) || 'Gagal simpan urutan');
+            window.location.reload();
+            return;
+          }
+          toast.success('Urutan diperbarui.');
+        } catch (err) {
+          toast.error((err as Error).message || 'Gagal simpan urutan');
+          window.location.reload();
+        }
+      });
+    });
+  }
 </script>

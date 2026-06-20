@@ -1,5 +1,6 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
+import ProfilPhotoUpload from '../../components/admin/ProfilPhotoUpload.astro';
 import { supabase } from '../../lib/supabase';
 
 const { data: profilData, error } = await supabase
@@ -38,6 +39,8 @@ const waHref = waClean ? `https://wa.me/${waClean}` : '#';
     <form id="profil-form" class="lg:col-span-2 space-y-6">
       <div id="profil-error" role="alert" class="hidden px-3.5 py-2.5 rounded-[10px] bg-red-50 border border-red-200/60 text-sm text-red-700"></div>
       <div id="profil-success" role="status" class="hidden px-3.5 py-2.5 rounded-[10px] bg-emerald-50 border border-emerald-200/60 text-sm text-emerald-700"></div>
+
+      <ProfilPhotoUpload currentUrl={profil.foto_url} nama={profil.nama} />
 
       <section class="admin-card p-5">
         <h3 class="font-display font-semibold text-samsung-ink mb-4">Identitas</h3>

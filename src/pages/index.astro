@@ -71,6 +71,11 @@ if (produkError) {
 
 const produkList = produkData || [];
 
+// Featured subset for the "Unggulan" section (active + featured only, cap 6)
+const featuredList = produkList
+  .filter((p) => p.is_featured)
+  .slice(0, 6);
+
 // Fetch testimoni dari Supabase
 const { data: testimoniData, error: testimoniError } = await supabase
   .from('testimoni')
@@ -88,6 +93,9 @@ const testimoniList = testimoniData || [];
 
 <BaseLayout title="Herman Baharuddin - Sales Executive Samsung">
   <Hero profil={profil} settings={settings} />
+  {featuredList.length > 0 && (
+    <ProdukGrid produkList={featuredList} showFilter={false} id="unggulan" />
+  )}
   <ProdukGrid produkList={produkList} />
   <TentangSaya profil={profil} />
   <Testimoni testimoniList={testimoniList} />
